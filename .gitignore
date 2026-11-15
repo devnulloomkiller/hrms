@@ -1,0 +1,25 @@
+# Build artifacts
+bin/
+obj/
+*.user
+
+# Runtime database
+*.db
+*.db-shm
+*.db-wal
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+.DS_Store
+
+# Agent tooling local state
+.serena/
+.insect/
+
+# npm
+node_modules/
+
+# Logs
+*.log
