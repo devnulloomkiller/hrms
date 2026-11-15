@@ -1,0 +1,48 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string Active(string controller) => currentController.Equals(controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    string? Current(string controller) => currentController.Equals(controller, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+<nav class="sidebar-nav" aria-label="Основная навигация">
+    <div class="sidebar-section">
+        <a class="sidebar-link @Active("Home")" aria-current="@Current("Home")" asp-controller="Home" asp-action="Index">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Обзор найма</span>
+        </a>
+    </div>
+    <div class="sidebar-section">
+        <p class="sidebar-label">Найм</p>
+        <a class="sidebar-link @Active("Vacancies")" aria-current="@Current("Vacancies")" asp-controller="Vacancies" asp-action="Index">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
+            <span>Вакансии</span>
+        </a>
+        <a class="sidebar-link @Active("Candidates")" aria-current="@Current("Candidates")" asp-controller="Candidates" asp-action="Index">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2M16 4a3 3 0 0 1 0 6M18 13a5 5 0 0 1 3 5v2"/></svg>
+            <span>Кандидаты</span>
+        </a>
+        <a class="sidebar-link @Active("Resumes")" aria-current="@Current("Resumes")" asp-controller="Resumes" asp-action="Index">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+            <span>Резюме</span>
+        </a>
+        <a class="sidebar-link @Active("Interviews")" aria-current="@Current("Interviews")" asp-controller="Interviews" asp-action="Index">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 15h3"/></svg>
+            <span>Собеседования</span>
+        </a>
+    </div>
+    <div class="sidebar-section">
+        <p class="sidebar-label">Анализ</p>
+        <a class="sidebar-link @Active("Reports")" aria-current="@Current("Reports")" asp-controller="Reports" asp-action="ExpiringVacancies">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+            <span>Отчёты</span>
+        </a>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true) {
+        <div class="sidebar-section">
+            <p class="sidebar-label">Управление</p>
+            <a class="sidebar-link @Active("Manage")" aria-current="@Current("Manage")" asp-controller="Manage" asp-action="Index">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15a1.7 1.7 0 0 0-1.55-1.03H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.55 1.03H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+                <span>Пользователи</span>
+            </a>
+        </div>
+    }
+</nav>

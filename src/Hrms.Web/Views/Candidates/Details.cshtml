@@ -1,0 +1,49 @@
+@model Hrms.Domain.Entities.Candidate
+@using Hrms.Web.Models
+@{ ViewData["Title"] = $"{Model.LastName} {Model.FirstName}"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">@Model.LastName @Model.FirstName</h1>
+        <p class="page-description">Контакты и история откликов кандидата.</p>
+    </div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Изменить кандидата</a>
+</header>
+<div class="card detail-card">
+    <dl class="row g-3 mb-0">
+        <dt class="col-sm-3">Email</dt><dd class="col-sm-9"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+        <dt class="col-sm-3">Телефон</dt><dd class="col-sm-9">@(Model.Phone ?? "Не указан")</dd>
+    </dl>
+</div>
+<section aria-labelledby="candidate-resumes" class="mt-4">
+    <h2 id="candidate-resumes">Резюме (@Model.Resumes.Count)</h2>
+    @if (Model.Resumes.Count == 0) {
+        <div class="empty-state mt-3">
+            <h3>У кандидата нет резюме</h3>
+            <p>Добавьте резюме, чтобы связать кандидата с вакансией.</p>
+            <a asp-controller="Resumes" asp-action="Create" class="btn btn-primary">Добавить резюме</a>
+        </div>
+    } else {
+        <div class="card table-card mt-3">
+            <div class="table-wrap">
+                <table class="table">
+                    <caption class="visually-hidden">Резюме кандидата @Model.LastName @Model.FirstName</caption>
+                    <thead><tr><th>Должность</th><th>Опыт</th><th>Статус</th><th>Подано</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var r in Model.Resumes) {
+                        <tr>
+                            <td>@(r.Vacancy?.Title ?? "Без вакансии")</td>
+                            <td>@r.ExperienceYears л.</td>
+                            <td>@Html.Raw(r.Status.Pill())</td>
+                            <td>@r.SubmittedAt.ToString("dd.MM.yyyy")</td>
+                            <td class="text-end"><a asp-controller="Resumes" asp-action="Details" asp-route-id="@r.Id">Подробнее</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
+<div class="form-actions">
+    <a asp-action="Index" class="btn btn-outline-secondary">Вернуться к кандидатам</a>
+</div>

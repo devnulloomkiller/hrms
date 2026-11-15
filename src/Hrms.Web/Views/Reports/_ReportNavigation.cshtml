@@ -1,0 +1,10 @@
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string Active(string action) => currentAction.Equals(action, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    string? Current(string action) => currentAction.Equals(action, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+<nav class="secondary-nav" aria-label="Виды отчётов">
+    <a class="@Active("ExpiringVacancies")" aria-current="@Current("ExpiringVacancies")" asp-action="ExpiringVacancies">Сроки приёма</a>
+    <a class="@Active("CandidateProfile")" aria-current="@Current("CandidateProfile")" asp-action="CandidateProfile">Профиль кандидата</a>
+    <a class="@Active("InterviewSummary")" aria-current="@Current("InterviewSummary")" asp-action="InterviewSummary">Итоги собеседований</a>
+</nav>

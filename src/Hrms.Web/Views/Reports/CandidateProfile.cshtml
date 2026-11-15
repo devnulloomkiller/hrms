@@ -1,0 +1,80 @@
+@model Hrms.Application.DTOs.CandidateProfileDto?
+@using Hrms.Web.Models
+@{
+    ViewData["Title"] = "Профиль кандидата";
+    var candList = ViewBag.Candidates as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+}
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Профиль кандидата</h1>
+        <p class="page-description">Все резюме и собеседования выбранного кандидата.</p>
+    </div>
+</header>
+<partial name="_ReportNavigation" />
+<form method="get" class="filter-bar">
+    <div class="filter-field flex-grow-1">
+        <label class="form-label" for="candidate-id">Кандидат</label>
+        <select id="candidate-id" name="id" class="form-select" asp-items="candList">
+            <option value="">Выберите кандидата</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-outline-primary">Показать профиль</button>
+</form>
+@if (Model is null) {
+    <section class="empty-state">
+        <h2>Кандидат не выбран</h2>
+        <p>Выберите кандидата в поле выше, чтобы увидеть его контакты, резюме и историю собеседований.</p>
+    </section>
+} else {
+    <section class="profile-summary" aria-labelledby="candidate-name">
+        <div>
+            <h2 id="candidate-name">@Model.FullName</h2>
+            <p class="text-muted mb-0">@Model.Email @(string.IsNullOrEmpty(Model.Phone) ? "" : $"· {Model.Phone}")</p>
+        </div>
+        <dl class="profile-metrics">
+            <div><dt>Резюме</dt><dd>@Model.TotalResumes</dd></div>
+            <div><dt>Собеседования</dt><dd>@Model.TotalInterviews</dd></div>
+        </dl>
+    </section>
+    @if (Model.Resumes.Count == 0) {
+        <section class="empty-state">
+            <h2>У кандидата нет резюме</h2>
+            <p>Добавьте резюме, чтобы отслеживать отклики и собеседования кандидата.</p>
+            <a asp-controller="Resumes" asp-action="Create" class="btn btn-primary">Добавить резюме</a>
+        </section>
+    }
+    @foreach (var r in Model.Resumes) {
+        <article class="card mb-3">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="fw-semibold">Резюме #@r.ResumeId на вакансию «@(r.VacancyTitle ?? "не указана")»</span>
+                <span class="d-flex flex-wrap gap-2 align-items-center">
+                    @Html.Raw(r.Status.Pill())
+                    <span class="text-muted small">@r.ExperienceYears л. · @r.SubmittedAt.ToString("dd.MM.yyyy")</span>
+                </span>
+            </div>
+            <div class="card-body">
+                @if (r.Interviews.Count == 0) {
+                    <span class="text-muted">По этому резюме собеседования ещё не назначены.</span>
+                } else {
+                    <div class="table-wrap">
+                        <table class="table table-sm align-middle">
+                            <caption class="visually-hidden">Собеседования по резюме #@r.ResumeId</caption>
+                            <thead><tr><th>Дата</th><th>Вакансия</th><th>Формат</th><th>Итог</th><th>Участники</th></tr></thead>
+                            <tbody>
+                            @foreach (var i in r.Interviews) {
+                                <tr>
+                                    <td class="font-mono text-nowrap">@i.ScheduledAt.ToString("dd.MM HH:mm")</td>
+                                    <td>@i.VacancyTitle</td>
+                                    <td>@Html.Raw(i.Mode.Pill())</td>
+                                    <td>@Html.Raw(i.Result.Pill())</td>
+                                    <td class="text-muted small">@string.Join(", ", i.Participants)</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </article>
+    }
+}

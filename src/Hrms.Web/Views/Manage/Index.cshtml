@@ -1,0 +1,41 @@
+@model List<(Hrms.Infrastructure.Data.ApplicationUser User, IList<string> Roles)>
+@{ ViewData["Title"] = "Пользователи"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Пользователи</h1>
+        <p class="page-description">Учётные записи сотрудников и их роли в системе.</p>
+    </div>
+</header>
+@if (Model.Count == 0) {
+    <section class="empty-state">
+        <h2>Пользователей нет</h2>
+        <p>Зарегистрируйте сотрудника, чтобы выдать ему доступ к кадровому учёту.</p>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Зарегистрировать пользователя</a>
+    </section>
+} else {
+    <div class="card table-card">
+        <div class="table-wrap">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Пользователи и их роли</caption>
+                <thead><tr><th>Имя</th><th>Email</th><th>Роли</th><th class="text-end">Действия</th></tr></thead>
+                <tbody>
+                @foreach (var (user, roles) in Model) {
+                    <tr>
+                        <td>@(user.DisplayName ?? "Не указано")</td>
+                        <td>@user.Email</td>
+                        <td>@string.Join(", ", roles)</td>
+                        <td class="text-end">
+                            @if (User.IsInRole("Admin")) {
+                                <form asp-action="ToggleAdmin" method="post" class="d-inline">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">@(roles.Contains("Admin") ? "Снять роль Admin" : "Назначить Admin")</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

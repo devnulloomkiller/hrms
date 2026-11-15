@@ -1,0 +1,13 @@
+@model Hrms.Domain.Entities.Vacancy
+@{ ViewData["Title"] = $"Удалить: {Model.Title}"; }
+<header class="page-header">
+    <div class="page-header-copy"><h1 class="page-title">Удалить вакансию</h1></div>
+</header>
+<div class="card delete-card">
+    <h2>Удалить «@Model.Title» из отдела «@Model.Department»? Это действие нельзя отменить.</h2>
+    <form asp-action="Delete" method="post" class="form-actions">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Удалить вакансию</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+    </form>
+</div>

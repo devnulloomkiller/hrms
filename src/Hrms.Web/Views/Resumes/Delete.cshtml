@@ -1,0 +1,13 @@
+@model Hrms.Domain.Entities.Resume
+@{ ViewData["Title"] = $"Удалить резюме #{Model.Id}"; }
+<header class="page-header">
+    <div class="page-header-copy"><h1 class="page-title">Удалить резюме</h1></div>
+</header>
+<div class="card delete-card">
+    <h2>Удалить резюме кандидата @Model.Candidate.LastName @Model.Candidate.FirstName на вакансию «@(Model.Vacancy?.Title ?? "не указана")»? Связанные собеседования также будут удалены.</h2>
+    <form asp-action="Delete" method="post" class="form-actions">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Удалить резюме</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+    </form>
+</div>

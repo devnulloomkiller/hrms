@@ -1,0 +1,50 @@
+@model List<Hrms.Application.DTOs.VacancyInterviewSummaryDto>
+@{ ViewData["Title"] = "Итоги собеседований"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Собеседования по вакансиям</h1>
+        <p class="page-description">Количество встреч и их результаты за выбранный период.</p>
+    </div>
+</header>
+<partial name="_ReportNavigation" />
+<form method="get" class="filter-bar">
+    <div class="filter-field">
+        <label class="form-label" for="from">Начало периода</label>
+        <input id="from" type="date" class="form-control" name="from" value="@ViewBag.From" />
+    </div>
+    <div class="filter-field">
+        <label class="form-label" for="to">Конец периода</label>
+        <input id="to" type="date" class="form-control" name="to" value="@ViewBag.To" />
+    </div>
+    <button type="submit" class="btn btn-outline-primary">Построить отчёт</button>
+</form>
+@if (Model.Count == 0) {
+    <section class="empty-state">
+        <h2>За этот период собеседований нет</h2>
+        <p>Измените даты или назначьте собеседование, чтобы данные появились в отчёте.</p>
+        <a asp-controller="Interviews" asp-action="Create" class="btn btn-primary">Назначить собеседование</a>
+    </section>
+} else {
+    <div class="card table-card">
+        <div class="table-wrap">
+            <table class="table table-hover align-middle">
+                <caption class="visually-hidden">Сводка собеседований по вакансиям</caption>
+                <thead><tr><th>Вакансия</th><th>Отдел</th><th>Всего</th><th>Пройдено</th><th>Провалено</th><th>Запланировано</th><th>Отменено</th><th>Конверсия</th></tr></thead>
+                <tbody>
+                @foreach (var v in Model) {
+                    <tr>
+                        <td><a asp-controller="Vacancies" asp-action="Details" asp-route-id="@v.VacancyId" class="text-decoration-none fw-semibold">@v.Title</a></td>
+                        <td class="text-muted">@v.Department</td>
+                        <td><strong>@v.TotalInterviews</strong></td>
+                        <td class="text-success">@v.Passed</td>
+                        <td class="text-danger">@v.Failed</td>
+                        <td>@v.Scheduled</td>
+                        <td class="text-muted">@v.Cancelled</td>
+                        <td>@(v.TotalInterviews == 0 ? "Нет данных" : $"{(double)v.Passed / v.TotalInterviews:P0}")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

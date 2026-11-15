@@ -1,0 +1,45 @@
+@model Hrms.Domain.Entities.Candidate
+@{
+    var isEdit = Model.Id != 0;
+    ViewData["Title"] = isEdit ? $"Изменить: {Model.LastName} {Model.FirstName}" : "Новый кандидат";
+}
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-description">Контактные данные для связи с кандидатом.</p>
+    </div>
+</header>
+<div class="card form-card">
+    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+        @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="LastName" class="form-label">Фамилия</label>
+                <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="FirstName" class="form-label">Имя</label>
+                <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Phone" class="form-label">Телефон</label>
+                <input asp-for="Phone" class="form-control" autocomplete="tel" />
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить кандидата</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
