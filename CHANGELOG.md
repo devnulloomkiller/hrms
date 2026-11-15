@@ -41,6 +41,24 @@
 
 **ADR**: `2026-11-15-implement-reports-and-authentication.md` (запросы через проекции в Application; Identity cookie + роли; альтернативы: сырой SQL, JWT, policies). Индекс обновлён.
 
+## 2026-11-15 (6)
+
+### UI: тёмная тема по design system из ui-ux-pro-max
+
+- Design system сгенерирован скиллом и сохранён: `design-system/hrms/MASTER.md` (источник правды для UI): glassmorphism-dashboard профиль, тёмный slate (#0F172A фон, #22C55E акцент), Fira Sans/Code, backdrop-blur карточки
+- `site.css` переписан на CSS-переменные из MASTER: sidebar-лейаут (сайдбар 232px на десктопе, топбар на мобиле), стеклянные карточки, таблицы в карточках с overflow-x, статусы-пиллы (цвет + русский текст), focus-visible, prefers-reduced-motion
+- `_Layout.cshtml`: сайдбар с SVG-иконками (без эмодзи), активный пункт по контроллеру, пользователь + logout внизу
+- Index-страницы всех сущностей: таблицы в карточках, пустые состояния, кнопки-действия, пиллы статусов (`PillExtensions`: RU-названия + Pill())
+- Отчёты: подсветка строк row-danger/warning, карточки-счётчики в профиле кандидата
+- Логин: центрированная карточка; Home: карточки разделов
+- Попутно: build 0 ошибок/0 предупреждений
+
+### Git
+
+- Репозиторий инициализирован, история разбита на 13 коммитов по слоям/зонам (docs → ADR → database → domain → infrastructure → application → web controllers → UI → skills)
+- Remote: `git@github.com:devnulloomkiller/hrms.git` (origin). Пуш — вручную
+- `.gitignore`: bin/obj, *.db, IDE, agent state (.serena, .insect), node_modules
+
 ## 2026-11-15 (4)
 
 ### CRUD: все сущности
