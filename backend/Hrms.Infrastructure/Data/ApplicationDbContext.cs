@@ -25,7 +25,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             e.Property(v => v.Department).HasMaxLength(100).IsRequired();
             e.Property(v => v.SalaryMin).HasPrecision(12, 2);
             e.Property(v => v.SalaryMax).HasPrecision(12, 2);
-            e.ToTable(t => t.HasCheckConstraint("CK_Vacancy_SalaryRange", "\"SalaryMax\" IS NULL OR \"SalaryMax\" >= \"SalaryMin\""));
+            e.ToTable(t => t.HasCheckConstraint("CK_Vacancy_SalaryRange", "`SalaryMax` IS NULL OR `SalaryMax` >= `SalaryMin`"));
         });
 
         builder.Entity<Candidate>(e =>

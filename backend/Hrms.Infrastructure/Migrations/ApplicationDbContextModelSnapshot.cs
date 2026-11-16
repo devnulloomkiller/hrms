@@ -15,36 +15,38 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261115120720_ExtendedSchema_ResumeDetails_Interviewers";
+    public override string LastMigrationId => "20261116182558_InitialCreate";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
 #pragma warning disable 612, 618
-        modelBuilder.HasAnnotation("ProductVersion", "11.0.0");
+        modelBuilder
+            .HasAnnotation("ProductVersion", "11.0.0")
+            .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
         modelBuilder.Entity("Hrms.Domain.Entities.Candidate", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Email")
                     .IsRequired()
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<string>("FirstName")
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(100)");
 
                 b.Property<string>("LastName")
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(100)");
 
                 b.Property<string>("Phone")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.HasKey("Id");
 
@@ -58,25 +60,25 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("Mode")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Notes")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<int>("Result")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("ResumeId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<DateTime>("ScheduledAt")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("datetime(6)");
 
                 b.Property<int>("VacancyId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.HasKey("Id");
 
@@ -92,15 +94,15 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Hrms.Domain.Entities.InterviewInterviewer", b =>
             {
                 b.Property<int>("InterviewId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("InterviewerId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Role")
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(50)");
 
                 b.HasKey("InterviewId", "InterviewerId");
 
@@ -113,19 +115,19 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Email")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<string>("FullName")
                     .IsRequired()
                     .HasMaxLength(200)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(200)");
 
                 b.Property<string>("Position")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.HasKey("Id");
 
@@ -139,27 +141,27 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("CandidateId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("ExperienceYears")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<int>("Status")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<DateTime>("SubmittedAt")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("datetime(6)");
 
                 b.Property<string>("Summary")
                     .IsRequired()
                     .HasMaxLength(2000)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(2000)");
 
                 b.Property<int?>("VacancyId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.HasKey("Id");
 
@@ -175,19 +177,19 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Hrms.Domain.Entities.ResumeDetails", b =>
             {
                 b.Property<int>("ResumeId")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Education")
                     .HasMaxLength(500)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(500)");
 
                 b.Property<string>("FilePath")
                     .HasMaxLength(1000)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(1000)");
 
                 b.Property<string>("Skills")
                     .HasMaxLength(1000)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(1000)");
 
                 b.HasKey("ResumeId");
 
@@ -198,100 +200,100 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<DateOnly?>("AcceptingResumesUntil")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("date");
 
                 b.Property<string>("Department")
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(100)");
 
                 b.Property<string>("Description")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<DateOnly>("PublishedAt")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("date");
 
                 b.Property<decimal?>("SalaryMax")
                     .HasPrecision(12, 2)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("decimal(12,2)");
 
                 b.Property<decimal>("SalaryMin")
                     .HasPrecision(12, 2)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("decimal(12,2)");
 
                 b.Property<int>("Status")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("Title")
                     .IsRequired()
                     .HasMaxLength(200)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(200)");
 
                 b.HasKey("Id");
 
                 b.ToTable("Vacancies", t =>
                     {
-                        t.HasCheckConstraint("CK_Vacancy_SalaryRange", "\"SalaryMax\" IS NULL OR \"SalaryMax\" >= \"SalaryMin\"");
+                        t.HasCheckConstraint("CK_Vacancy_SalaryRange", "`SalaryMax` IS NULL OR `SalaryMax` >= `SalaryMin`");
                     });
             });
 
         modelBuilder.Entity("Hrms.Infrastructure.Data.ApplicationUser", b =>
             {
                 b.Property<string>("Id")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<int>("AccessFailedCount")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("ConcurrencyStamp")
                     .IsConcurrencyToken()
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("DisplayName")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("Email")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<bool>("EmailConfirmed")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("tinyint(1)");
 
                 b.Property<bool>("LockoutEnabled")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("tinyint(1)");
 
                 b.Property<DateTimeOffset?>("LockoutEnd")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("datetime");
 
                 b.Property<string>("NormalizedEmail")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<string>("NormalizedUserName")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<string>("PasswordHash")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("PhoneNumber")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<bool>("PhoneNumberConfirmed")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("tinyint(1)");
 
                 b.Property<string>("SecurityStamp")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<bool>("TwoFactorEnabled")
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("tinyint(1)");
 
                 b.Property<string>("UserName")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.HasKey("Id");
 
@@ -308,19 +310,19 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
             {
                 b.Property<string>("Id")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("ConcurrencyStamp")
                     .IsConcurrencyToken()
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("Name")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.Property<string>("NormalizedName")
                     .HasMaxLength(256)
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(256)");
 
                 b.HasKey("Id");
 
@@ -335,17 +337,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("ClaimType")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("ClaimValue")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("RoleId")
                     .IsRequired()
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.HasKey("Id");
 
@@ -358,17 +360,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("INTEGER");
+                    .HasColumnType("int");
 
                 b.Property<string>("ClaimType")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("ClaimValue")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("UserId")
                     .IsRequired()
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.HasKey("Id");
 
@@ -380,17 +382,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
             {
                 b.Property<string>("LoginProvider")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("ProviderKey")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("ProviderDisplayName")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.Property<string>("UserId")
                     .IsRequired()
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.HasKey("LoginProvider", "ProviderKey");
 
@@ -402,10 +404,10 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
             {
                 b.Property<string>("UserId")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("RoleId")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.HasKey("UserId", "RoleId");
 
@@ -417,16 +419,16 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
             {
                 b.Property<string>("UserId")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("LoginProvider")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("Name")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("varchar(255)");
 
                 b.Property<string>("Value")
-                    .HasColumnType("TEXT");
+                    .HasColumnType("longtext");
 
                 b.HasKey("UserId", "LoginProvider", "Name");
 

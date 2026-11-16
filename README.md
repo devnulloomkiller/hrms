@@ -12,7 +12,7 @@
 ## Стек
 
 - ASP.NET Core 11, MVC
-- Entity Framework Core 11 + SQLite (разработка/демонстрация)
+- Entity Framework Core 11 + MySQL 8.4 (Docker, разработка/демонстрация)
 - ASP.NET Core Identity (аутентификация, роли Admin/HR)
 
 Решение зафиксировано в ADR: `contributing/decisions/2026-11-15-build-on-aspnet-core-with-ef-core.md`
@@ -41,16 +41,17 @@ CHANGELOG.md           # журнал изменений
 
 - Админ: `admin@hrms.local` / `Admin123` (создаётся автоматически при старте)
 - Регистрация (`/Account/Register`) — пользователь с ролью HR
-- Демо-данные: после первого старта `sqlite3 frontend/Hrms.Web/hrms.db < database/02_seed_data.sql`
+- Демо-данные: после первого старта `docker exec -i hrms-db mysql -uhrms -phrms hrms < database/02_seed_data.sql`
 
 ## Сборка и запуск
 
 ```bash
+docker compose up -d
 dotnet build
 dotnet run --project frontend/Hrms.Web
 ```
 
-База: SQLite-файл, создаётся миграциями (команда миграций появится после первого `dotnet ef` — см. CHANGELOG).
+База: MySQL 8.4 в Docker (`docker compose up -d`, контейнер `hrms-db`); схема создаётся миграциями при первом старте приложения. Провайдер — `MySql.EntityFrameworkCore` (подробности — в ADR).
 
 ## Документация для агентов
 

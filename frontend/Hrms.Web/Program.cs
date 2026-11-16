@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("Default") ?? "Data Source=hrms.db");
+    builder.Configuration.GetConnectionString("Default")
+    ?? "Server=localhost;Port=3306;Database=hrms;User=hrms;Password=hrms;");
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
     {

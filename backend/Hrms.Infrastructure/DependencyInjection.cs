@@ -9,7 +9,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<ApplicationDbContext>(o => o.UseSqlite(connectionString));
+        services.AddDbContext<ApplicationDbContext>(o => o.UseMySQL(connectionString));
         services.AddScoped(typeof(IHrmsRepository<>), typeof(EfRepository<>));
         services.AddScoped<IVacancyService, Hrms.Application.Services.VacancyService>();
         services.AddScoped<ICandidateService, Hrms.Application.Services.CandidateService>();

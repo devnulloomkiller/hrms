@@ -1,6 +1,6 @@
 # Схема базы данных HRMS
 
-СУБД: SQLite (EF Core-миграции дублируются скриптами в `database/`).
+СУБД: MySQL 8.4 в Docker (EF Core-миграции создают схему при старте приложения; скрипты в `database/` повторяют логическую схему).
 
 ## Таблицы и связи
 
@@ -33,12 +33,12 @@
 
 ```bash
 # создание
-sqlite3 hrms.db < database/01_create_tables.sql
+docker exec -i hrms-db mysql -uroot -phrms_root hrms < database/01_create_tables.sql
 # заполнение
-sqlite3 hrms.db < database/02_seed_data.sql
+docker exec -i hrms-db mysql -uhrms -phrms hrms < database/02_seed_data.sql
 ```
 
-Проверено (2026-11-15): create+seed проходят без ошибок; счётчики: 5 кандидатов, 5 вакансий, 9 резюме, 5 деталей, 8 собеседований, 5 интервьюеров, 12 участников.
+Проверено (2026-11-16, MySQL 8.4 в контейнере): create+seed проходят без ошибок; счётчики: 5 кандидатов, 5 вакансий, 9 резюме, 5 деталей, 8 собеседований, 5 интервьюеров, 12 участников; JOIN через junction-таблицу корректен.
 
 ## ER-диаграмма (текстовая)
 
