@@ -55,4 +55,4 @@ Candidates 1───N Resumes N───1 Vacancies
 
 ## Соответствие модели EF Core
 
-Те же сущности в `src/Hrms.Domain/Entities/` + fluent-конфигурация в `ApplicationDbContext`. Миграция `InitialCreate` — до изменения схемы (ResumeDetails/Interviewer/InterviewInterviewers добавлены позже, нужна новая миграция).
+Те же сущности в `backend/Hrms.Domain/Entities/` + fluent-конфигурация в `ApplicationDbContext`. Миграция `InitialCreate` — до изменения схемы (ResumeDetails/Interviewer/InterviewInterviewers добавлены позже, нужна новая миграция).

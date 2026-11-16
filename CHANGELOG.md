@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+- Скиллы вынесены из репозитория: `adr-skill` → глобальный `~/.agents/skills/adr-skill` (+ симлинк `~/.claude/skills/adr-skill` по общему паттерну), дизайн-скиллы (ui-ux-pro-max, design, design-system и др.) синхронизированы со свежими проектными копиями в `~/.agents/skills/`, antislop остался в `~/.config/zed/` (проектные копии были идентичны глобальным). Из репо удалены `.agents/`, `skills/`, `antislop.md`, `skills-lock.json`, локальные каталоги инструментов `.zcode/`, `.serena/`; пути в AGENTS.md переписаны на глобальные, из `.gitignore` убраны устаревшие записи agent-state
+- Рефакторинг структуры репозитория: `HRMS.slnx` в корне, серверные слои в `backend/` (Domain, Application, Infrastructure), MVC-приложение в `frontend/Hrms.Web`. ADR: `contributing/decisions/2026-11-16-organize-repository-into-backend-and-frontend.md`
+- Порядок внутри проектов: enum'ы — в `backend/Hrms.Domain/Enums/` (namespace `Hrms.Domain.Enums`), view-модели — в `frontend/Hrms.Web/ViewModels/` (`Hrms.Web.ViewModels`), PillExtensions — в `frontend/Hrms.Web/Extensions/` (`Hrms.Web.Extensions`), DTO — в `backend/Hrms.Application/DTOs/` (как и было). Ссылки на статусы в Razor переписаны на новый namespace
+- Проверено: `dotnet build` — 0 ошибок/0 предупреждений; smoke curl: `/` и `/Account/Login` → 200, `/Vacancies` анонимом → 302 на Login, `/css/site.css` → 200; БД `frontend/Hrms.Web/hrms.db` переехала вместе с проектом
 - Палитра интерфейса переведена в монохром: чёрный, белый и нейтральные оттенки серого для светлой и тёмной тем, включая статусы, кнопки, дедлайны и боковую навигацию.
 - Полный SaaS-редизайн: боковая навигация с группами, Plus Jakarta Sans, светлая и тёмная темы, обновлённые таблицы, формы, отчёты, состояния и мобильные карточки.
 - Новый дашборд на главной для авторизованных пользователей: реальные счётчики вакансий, кандидатов, резюме и собеседований, ближайшие дедлайны, последние отклики и быстрые действия. Данные анонимам не показываются.
@@ -12,7 +16,7 @@
 
 Планируется:
 - Финальная зачистка: шаблонные Home/Privacy при необходимости, README-скриншоты
-- Опционально: seed бизнес-данных при старте (сейчас вручную: `sqlite3 src/Hrms.Web/hrms.db < database/02_seed_data.sql` после первого запуска)
+- Опционально: seed бизнес-данных при старте (сейчас вручную: `sqlite3 frontend/Hrms.Web/hrms.db < database/02_seed_data.sql` после первого запуска)
 
 ## 2026-11-15 (5)
 

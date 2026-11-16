@@ -1,0 +1,35 @@
+@model Hrms.Domain.Entities.Interview
+@{ ViewData["Title"] = $"Собеседование #{Model.Id}"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Собеседование #@Model.Id</h1>
+        <p class="page-description">@Model.ScheduledAt.ToString("dd.MM.yyyy HH:mm")</p>
+    </div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Изменить собеседование</a>
+</header>
+<div class="card detail-card">
+    <dl class="row g-3">
+        <dt class="col-sm-3">Кандидат</dt><dd class="col-sm-9">@Model.Resume.Candidate.LastName @Model.Resume.Candidate.FirstName</dd>
+        <dt class="col-sm-3">Вакансия</dt><dd class="col-sm-9">@Model.Vacancy.Title</dd>
+        <dt class="col-sm-3">Дата и время</dt><dd class="col-sm-9">@Model.ScheduledAt.ToString("dd.MM.yyyy HH:mm")</dd>
+        <dt class="col-sm-3">Формат</dt><dd class="col-sm-9">@Html.Raw(Model.Mode.Pill())</dd>
+        <dt class="col-sm-3">Итог</dt><dd class="col-sm-9">@Html.Raw(Model.Result.Pill())</dd>
+    </dl>
+    <h2>Участники</h2>
+    @if (Model.Participants.Count == 0) {
+        <p class="text-muted">Участники не назначены.</p>
+    } else {
+        <ul class="participant-list">
+        @foreach (var p in Model.Participants) {
+            <li><strong>@p.Interviewer.FullName</strong><span>@p.Role, @p.Interviewer.Position</span></li>
+        }
+        </ul>
+    }
+    @if (!string.IsNullOrEmpty(Model.Notes)) {
+        <h2>Заметки</h2>
+        <p class="mb-0">@Model.Notes</p>
+    }
+</div>
+<div class="form-actions">
+    <a asp-action="Index" class="btn btn-outline-secondary">Вернуться к расписанию</a>
+</div>

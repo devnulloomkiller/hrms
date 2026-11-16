@@ -1,8 +1,10 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Hrms.Application/Hrms.Application.csproj" />
-    <Project Path="src/Hrms.Domain/Hrms.Domain.csproj" />
-    <Project Path="src/Hrms.Infrastructure/Hrms.Infrastructure.csproj" />
-    <Project Path="src/Hrms.Web/Hrms.Web.csproj" />
+  <Folder Name="/backend/">
+    <Project Path="backend/Hrms.Application/Hrms.Application.csproj" />
+    <Project Path="backend/Hrms.Domain/Hrms.Domain.csproj" />
+    <Project Path="backend/Hrms.Infrastructure/Hrms.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/frontend/">
+    <Project Path="frontend/Hrms.Web/Hrms.Web.csproj" />
   </Folder>
 </Solution>

@@ -4,14 +4,14 @@
 
 | # | Пункт задания | Статус | Где |
 |---|---------------|--------|-----|
-| 0а | Схема БД: связи 1:1, 1:N, N:N, ключи, ограничения | ✅ | `docs/database-schema.md`, сущности в `Hrms.Domain/Entities/` |
+| 0а | Схема БД: связи 1:1, 1:N, N:N, ключи, ограничения | ✅ | `docs/database-schema.md`, сущности в `backend/Hrms.Domain/Entities/` |
 | 0б | Скрипты создания БД и таблиц | ✅ | `database/01_create_tables.sql` |
 | 0в | Скрипты заполнения данными | ✅ | `database/02_seed_data.sql` (проверены на SQLite) |
-| 1 | Создать новое решение ASP.NET | ✅ | `HRMS.slnx`, 4 проекта в `src/` |
+| 1 | Создать новое решение ASP.NET | ✅ | `HRMS.slnx` в корне, слои в `backend/`, MVC в `frontend/Hrms.Web` |
 | 2 | Организовать структуру папок для слоёв | ✅ | Domain/Application/Infrastructure/Web |
 | 3 | Добавить пакеты NuGet | ✅ | EF Core Sqlite, Design, Identity.EntityFrameworkCore |
-| 4 | Создать модели (классы) для всех сущностей | ✅ | `Hrms.Domain/Entities/` |
-| 5 | Создать `ApplicationDbContext` от `DbContext` | ✅ | `Hrms.Infrastructure/Data/` (наследует `IdentityDbContext`) |
+| 4 | Создать модели (классы) для всех сущностей | ✅ | `backend/Hrms.Domain/Entities/`, `backend/Hrms.Domain/Enums/` |
+| 5 | Создать `ApplicationDbContext` от `DbContext` | ✅ | `backend/Hrms.Infrastructure/Data/` (наследует `IdentityDbContext`) |
 | 6 | Базовые CRUD-операции (реализовать и продемонстрировать) | ✅ | Vacancies/Candidates/Resumes/Interviews: контроллеры + представления, проверены curl'ом |
 | 7 | Нетривиальные запросы, 3 шт. | ✅ | `IReportService`: истекающие дедлайны, профиль кандидата, сводка собеседований; страницы Reports |
 | 8 | Аутентификация и авторизация | ✅ | Identity (cookie), роли Admin/HR, seed-админ, [Authorize] на контроллерах |

@@ -1,0 +1,25 @@
+@model Hrms.Domain.Entities.Resume
+@{ ViewData["Title"] = $"Резюме #{Model.Id}"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Резюме: @Model.Candidate.LastName @Model.Candidate.FirstName</h1>
+        <p class="page-description">Отклик от @Model.SubmittedAt.ToString("dd.MM.yyyy HH:mm")</p>
+    </div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Изменить резюме</a>
+</header>
+<div class="card detail-card">
+    <dl class="row g-3">
+        <dt class="col-sm-3">Вакансия</dt><dd class="col-sm-9">@(Model.Vacancy?.Title ?? "Без вакансии")</dd>
+        <dt class="col-sm-3">Опыт</dt><dd class="col-sm-9">@Model.ExperienceYears лет</dd>
+        <dt class="col-sm-3">Статус</dt><dd class="col-sm-9">@Html.Raw(Model.Status.Pill())</dd>
+        <dt class="col-sm-3">Подано</dt><dd class="col-sm-9">@Model.SubmittedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+        <dt class="col-sm-3">О кандидате</dt><dd class="col-sm-9">@Model.Summary</dd>
+        @if (Model.Details is not null) {
+            <dt class="col-sm-3">Образование</dt><dd class="col-sm-9">@Model.Details.Education</dd>
+            <dt class="col-sm-3">Навыки</dt><dd class="col-sm-9">@Model.Details.Skills</dd>
+        }
+    </dl>
+</div>
+<div class="form-actions">
+    <a asp-action="Index" class="btn btn-outline-secondary">Вернуться к резюме</a>
+</div>
