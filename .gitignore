@@ -14,12 +14,11 @@ obj/
 .idea/
 .DS_Store
 
-# Agent tooling local state
-.serena/
-.insect/
-
 # npm
 node_modules/
 
 # Logs
 *.log
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
