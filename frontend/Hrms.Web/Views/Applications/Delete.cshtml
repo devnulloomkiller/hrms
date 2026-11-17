@@ -1,0 +1,17 @@
+@model Hrms.Domain.Entities.JobApplication
+@{ ViewData["Title"] = "Удалить отклик"; }
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">Удалить отклик</h1>
+        <p class="page-description">Действие нельзя отменить.</p>
+    </div>
+</header>
+<div class="card delete-card">
+    <h2>Удалить отклик @Model.Candidate.LastName @Model.Candidate.FirstName на вакансию «@Model.Vacancy.Title»?</h2>
+    <p>Вместе с откликом удалятся все его собеседования (@Model.Interviews.Count). Если кандидат отозвал отклик, лучше перевести его в этап «Отозван».</p>
+    <form asp-action="Delete" method="post" class="form-actions">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Удалить отклик</button>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Отмена</a>
+    </form>
+</div>

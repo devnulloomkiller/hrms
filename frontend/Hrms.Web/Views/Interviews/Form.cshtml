@@ -1,71 +1,101 @@
 @model Hrms.Domain.Entities.Interview
+@using Hrms.Application.DTOs
+@using Hrms.Domain.Enums
 @{
     var isEdit = Model.Id != 0;
     ViewData["Title"] = isEdit ? $"Изменить собеседование #{Model.Id}" : "Новое собеседование";
-    var resumes = ViewBag.Resumes as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
-    var vacancies = ViewBag.Vacancies as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+    var applications = ViewBag.Applications as List<ApplicationOptionDto> ?? [];
     var interviewers = ViewBag.Interviewers as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
 }
 <header class="page-header">
     <div class="page-header-copy">
         <h1 class="page-title">@ViewData["Title"]</h1>
-        <p class="page-description">Выберите кандидата, время встречи и участников собеседования.</p>
+        <p class="page-description">Собеседование привязано к отклику: кандидат и вакансия берутся из него.</p>
     </div>
 </header>
 <div class="card form-card">
     <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
         @if (isEdit) { <input type="hidden" name="Id" value="@Model.Id" /> }
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label" for="resumeId">Резюме</label>
-                <select id="resumeId" name="resumeId" class="form-select" asp-items="resumes" required></select>
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+        @if (applications.Count == 0) {
+            <div class="empty-state">
+                <h2>Нет откликов для собеседования</h2>
+                <p>Сначала создайте отклик кандидата на вакансию — собеседование назначается по нему.</p>
+                <a asp-controller="Applications" asp-action="Create" class="btn btn-primary">Добавить отклик</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label" for="vacancyId">Вакансия</label>
-                <select id="vacancyId" name="vacancyId" class="form-select" asp-items="vacancies" required></select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-5 mb-3">
-                <label class="form-label" for="scheduledAt">Дата и время</label>
-                <input id="scheduledAt" name="scheduledAt" class="form-control" type="datetime-local" value="@Model.ScheduledAt.ToString("yyyy-MM-ddTHH:mm")" required />
-            </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label" for="mode">Формат</label>
-                <select id="mode" name="mode" asp-for="Mode" asp-items="Html.GetEnumSelectList<Hrms.Domain.Enums.InterviewMode>()" class="form-select"></select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label" for="result">Итог</label>
-                <select id="result" name="result" asp-for="Result" asp-items="Html.GetEnumSelectList<Hrms.Domain.Enums.InterviewResult>()" class="form-select"></select>
-            </div>
-        </div>
-        <fieldset class="mb-3">
-            <legend class="form-label">Участники и их роли</legend>
-            <div class="row g-3">
-            @for (var i = 0; i < interviewers.Count; i++) {
-                var selected = isEdit && Model.Participants.Any(p => p.InterviewerId.ToString() == interviewers[i].Value);
-                var role = isEdit ? Model.Participants.FirstOrDefault(p => p.InterviewerId.ToString() == interviewers[i].Value)?.Role ?? "Interviewer" : "Interviewer";
-                <div class="col-lg-6">
-                    <div class="participant-field">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="interviewerIds" value="@interviewers[i].Value" @(selected ? "checked" : "") id="iv-@i" />
-                            <label class="form-check-label" for="iv-@i">@interviewers[i].Text</label>
-                        </div>
-                        <label class="visually-hidden" for="role-@i">Роль участника @interviewers[i].Text</label>
-                        <input id="role-@i" class="form-control form-control-sm" name="roles" value="@role" aria-label="Роль участника @interviewers[i].Text" />
+        } else {
+            <fieldset class="form-section">
+                <legend class="form-section-title">Отклик и время</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="applicationId">Отклик</label>
+                    <select id="applicationId" name="applicationId" class="form-select" required>
+                        <option value="">Выберите кандидата и вакансию</option>
+                        @foreach (var application in applications) {
+                            <option value="@application.Id" selected="@(Model.ApplicationId == application.Id)">
+                                @application.CandidateName · @application.VacancyTitle · @application.Stage.Ru()
+                            </option>
+                        }
+                    </select>
+                    <span class="form-hint">Если отклик ещё на этапе «Новый отклик» или «Скрининг», после сохранения он перейдёт в «Собеседование».</span>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label" for="scheduledAt">Дата и время</label>
+                        <input id="scheduledAt" name="scheduledAt" class="form-control" type="datetime-local" value="@Model.ScheduledAt.ToString("yyyy-MM-ddTHH:mm")" required />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label" for="mode">Формат</label>
+                        <select id="mode" name="mode" class="form-select">
+                            @foreach (var value in Enum.GetValues<InterviewMode>()) {
+                                <option value="@value" selected="@(Model.Mode == value)">@value.Ru()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="result">Итог</label>
+                        <select id="result" name="result" class="form-select">
+                            @foreach (var value in Enum.GetValues<InterviewResult>()) {
+                                <option value="@value" selected="@(Model.Result == value)">@value.Ru()</option>
+                            }
+                        </select>
                     </div>
                 </div>
-            }
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend class="form-section-title">Участники и роли</legend>
+                <p class="form-hint">Отметьте, кто участвует во встрече, и укажите роль — она видна в карточке собеседования.</p>
+                <div class="row g-3">
+                @for (var i = 0; i < interviewers.Count; i++) {
+                    var selected = isEdit && Model.Participants.Any(p => p.InterviewerId.ToString() == interviewers[i].Value);
+                    var role = isEdit
+                        ? Model.Participants.FirstOrDefault(p => p.InterviewerId.ToString() == interviewers[i].Value)?.Role ?? "Interviewer"
+                        : "Interviewer";
+                    <div class="col-lg-6">
+                        <div class="participant-field">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="interviewerIds" value="@interviewers[i].Value" @(selected ? "checked" : "") id="iv-@i" />
+                                <label class="form-check-label" for="iv-@i">@interviewers[i].Text</label>
+                            </div>
+                            <label class="visually-hidden" for="role-@i">Роль участника @interviewers[i].Text</label>
+                            <input id="role-@i" class="form-control form-control-sm" name="roles" value="@role" aria-label="Роль участника @interviewers[i].Text" />
+                        </div>
+                    </div>
+                }
+                </div>
+            </fieldset>
+
+            <div class="mb-3">
+                <label class="form-label" for="notes">Заметки</label>
+                <textarea id="notes" name="notes" class="form-control" rows="4" placeholder="Что обсудить, ссылка на созвон, впечатления">@Model.Notes</textarea>
             </div>
-        </fieldset>
-        <div class="mb-3">
-            <label class="form-label" for="notes">Заметки</label>
-            <textarea id="notes" name="notes" class="form-control" rows="4">@Model.Notes</textarea>
-        </div>
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Сохранить собеседование</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
-        </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Сохранить собеседование</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        }
     </form>
 </div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

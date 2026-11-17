@@ -1,13 +1,17 @@
 @model Hrms.Domain.Entities.Interview
 @{ ViewData["Title"] = $"Удалить собеседование #{Model.Id}"; }
 <header class="page-header">
-    <div class="page-header-copy"><h1 class="page-title">Удалить собеседование</h1></div>
+    <div class="page-header-copy">
+        <h1 class="page-title">Удалить собеседование</h1>
+        <p class="page-description">Действие нельзя отменить.</p>
+    </div>
 </header>
 <div class="card delete-card">
-    <h2>Удалить собеседование с кандидатом @Model.Resume.Candidate.LastName @Model.Resume.Candidate.FirstName по вакансии «@Model.Vacancy.Title», назначенное на @Model.ScheduledAt.ToString("dd.MM.yyyy HH:mm")?</h2>
+    <h2>Удалить встречу с @Model.Application.Candidate.LastName @Model.Application.Candidate.FirstName по вакансии «@Model.Application.Vacancy.Title» на @Model.ScheduledAt.ToString("dd.MM.yyyy HH:mm")?</h2>
+    <p>Участники и заметки этой встречи тоже будут удалены. Этап отклика останется прежним.</p>
     <form asp-action="Delete" method="post" class="form-actions">
         <input type="hidden" asp-for="Id" />
         <button type="submit" class="btn btn-danger">Удалить собеседование</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Отмена</a>
     </form>
 </div>

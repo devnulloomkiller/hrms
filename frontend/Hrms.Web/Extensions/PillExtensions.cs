@@ -5,7 +5,8 @@ namespace Hrms.Web.Extensions;
 public static class PillExtensions
 {
     public static string Pill(this VacancyStatus s) => Wrap(s.Ru(), s.ToString().ToLowerInvariant());
-    public static string Pill(this ResumeStatus s) => Wrap(s.Ru(), s.ToString().ToLowerInvariant());
+    public static string Pill(this ApplicationStage s) => Wrap(s.Ru(), s.ToString().ToLowerInvariant());
+    public static string Pill(this MatchStatus s) => Wrap(s.Ru(), s.ToString().ToLowerInvariant());
     public static string Pill(this InterviewResult r) => Wrap(r.Ru(), r.ToString().ToLowerInvariant());
     public static string Pill(this InterviewMode m) => Wrap(m.Ru(), m.ToString().ToLowerInvariant());
 
@@ -18,12 +19,23 @@ public static class PillExtensions
         _ => s.ToString(),
     };
 
-    public static string Ru(this ResumeStatus s) => s switch
+    public static string Ru(this ApplicationStage s) => s switch
     {
-        ResumeStatus.New => "Новое",
-        ResumeStatus.InReview => "На рассмотрении",
-        ResumeStatus.Rejected => "Отклонено",
-        ResumeStatus.Accepted => "Принято",
+        ApplicationStage.Applied => "Новый отклик",
+        ApplicationStage.Screening => "Скрининг",
+        ApplicationStage.Interview => "Собеседование",
+        ApplicationStage.Offer => "Оффер",
+        ApplicationStage.Hired => "Нанят",
+        ApplicationStage.Rejected => "Отказ",
+        ApplicationStage.Withdrawn => "Отозван",
+        _ => s.ToString(),
+    };
+
+    public static string Ru(this MatchStatus s) => s switch
+    {
+        MatchStatus.Suggested => "Предложен",
+        MatchStatus.Shortlisted => "Шортлист",
+        MatchStatus.Rejected => "Не подходит",
         _ => s.ToString(),
     };
 

@@ -1,61 +1,84 @@
--- HRMS: заполнение таблиц демонстрационными данными (MySQL 8.4).
--- Выполнять после 01_create_tables.sql.
+-- HRMS: демо-данные (MySQL 8.4)
+-- Выполнять после 01_create_tables.sql. Скрипт идемпотентен: сначала очищает доменные таблицы.
 
-INSERT INTO Candidates (LastName, FirstName, Email, Phone) VALUES
-    ('Ivanov',   'Ivan',    'ivan.ivanov@example.com',    '+375 29 111-22-33'),
-    ('Petrov',   'Petr',    'petr.petrov@example.com',    '+375 29 222-33-44'),
-    ('Sidorova', 'Anna',    'anna.sidorova@example.com',  '+375 33 333-44-55'),
-    ('Kozlov',   'Dmitry',  'dmitry.kozlov@example.com',  '+375 29 444-55-66'),
-    ('Smirnova', 'Elena',   'elena.smirnova@example.com', '+375 25 555-66-77');
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+DELETE FROM `InterviewInterviewers`;
+DELETE FROM `Interviews`;
+DELETE FROM `ResumeVacancyMatches`;
+DELETE FROM `JobApplications`;
+DELETE FROM `ResumeDetails`;
+DELETE FROM `Resumes`;
+DELETE FROM `Interviewers`;
+DELETE FROM `Vacancies`;
+DELETE FROM `Candidates`;
+SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO Vacancies (Title, Department, Description, SalaryMin, SalaryMax, Status, PublishedAt, AcceptingResumesUntil) VALUES
-    ('Senior .NET Developer',   'IT',              'Backend development of internal systems.',  5000, 8000, 1, '2026-10-01', '2026-11-20'),
-    ('HR Manager',              'Human Resources', 'Full-cycle recruitment.',                   2500, 3500, 1, '2026-10-05', '2026-11-18'),
-    ('QA Engineer',             'IT',              'Manual and automated testing.',             3000, 4500, 1, '2026-10-10', '2026-11-30'),
-    ('Data Analyst',            'Analytics',       'BI reports and dashboards.',                3500, 5000, 2, '2026-09-15', '2026-10-31'),
-    ('DevOps Engineer',         'IT',              'CI/CD, Kubernetes.',                        6000, NULL, 1, '2026-11-01', '2026-12-15');
+INSERT INTO `Candidates` (`Id`, `LastName`, `FirstName`, `Email`, `Phone`) VALUES
+(1, 'Иванова', 'Анна', 'anna.ivanova@example.com', '+375 29 111-22-33'),
+(2, 'Петров', 'Максим', 'maksim.petrov@example.com', '+375 29 222-33-44'),
+(3, 'Смирнова', 'Ольга', 'olga.smirnova@example.com', '+375 29 333-44-55'),
+(4, 'Козлов', 'Дмитрий', 'dmitry.kozlov@example.com', '+375 29 444-55-66'),
+(5, 'Соколова', 'Елена', 'elena.sokolova@example.com', '+375 29 555-66-77'),
+(6, 'Лебедев', 'Игорь', 'igor.lebedev@example.com', '+375 29 666-77-88');
 
-INSERT INTO Resumes (CandidateId, VacancyId, Summary, ExperienceYears, SubmittedAt, Status) VALUES
-    (1, 1, '.NET developer, 7 years, ASP.NET Core, SQL.',     7, '2026-10-03 10:00:00', 1),
-    (1, 3, 'Some QA automation experience, Selenium.',        2, '2026-10-12 12:30:00', 2),
-    (2, 1, '.NET developer, 4 years, web services.',          4, '2026-10-07 09:15:00', 1),
-    (2, 5, 'Linux administration, Docker, K8s basics.',       5, '2026-11-02 14:45:00', 0),
-    (3, 2, 'HR generalist, 6 years, IT recruitment.',         6, '2026-10-08 11:20:00', 3),
-    (4, 3, 'QA engineer, 3 years, automated testing.',        3, '2026-10-15 16:00:00', 1),
-    (4, 4, 'SQL, PowerBI, basic statistics.',                 4, '2026-09-28 13:10:00', 2),
-    (5, 2, 'HR specialist, 3 years, sourcing and screening.', 3, '2026-10-20 10:50:00', 0),
-    (5, 4, 'Analyst: Excel, SQL, Tableau.',                   5, '2026-09-25 15:35:00', 1);
+INSERT INTO `Vacancies` (`Id`, `Title`, `Department`, `Description`, `SalaryMin`, `SalaryMax`, `MinExperience`, `RequiredSkills`, `Status`, `PublishedAt`, `AcceptingResumesUntil`) VALUES
+(1, 'Senior .NET Developer', 'Разработка', 'Разработка платформы внутренних сервисов, код-ревью и наставничество.', 280000, 420000, 5, 'C#, ASP.NET Core, EF Core, SQL', 1, DATE_SUB(CURDATE(), INTERVAL 14 DAY), DATE_ADD(CURDATE(), INTERVAL 12 DAY)),
+(2, 'HR Generalist', 'HR', 'Полный цикл подбора на технические и продуктовые роли.', 120000, 160000, 3, 'Подбор, HR-аналитика, интервью', 1, DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY)),
+(3, 'Product Designer', 'Продукт', 'Дизайн B2B-интерфейсов и развитие дизайн-системы.', 180000, 250000, 4, 'Figma, UX research, дизайн-системы', 1, DATE_SUB(CURDATE(), INTERVAL 7 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY)),
+(4, 'Data Analyst', 'Аналитика', 'Продуктовая аналитика и отчётность для команд.', 160000, 220000, 2, 'SQL, Python, Power BI', 2, DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(5, 'QA Engineer', 'Разработка', 'Тестовая стратегия, API- и UI-автотесты.', 130000, 180000, 3, 'Playwright, Selenium, API testing', 3, DATE_SUB(CURDATE(), INTERVAL 40 DAY), DATE_SUB(CURDATE(), INTERVAL 5 DAY));
 
-INSERT INTO ResumeDetails (ResumeId, Education, Skills, FilePath) VALUES
-    (1, 'BSU, Computer Science (2019)',    'C#, ASP.NET Core, EF Core, PostgreSQL, Docker',  '/files/resume_1.pdf'),
-    (3, 'BSUIR, Informatics (2022)',       'C#, .NET, REST, MS SQL',                         '/files/resume_3.pdf'),
-    (5, 'BSEU, HR Management (2018)',      'recruitment, onboarding, HRIS, interviewing',    '/files/resume_5.pdf'),
-    (6, 'BSUIR, Software Testing (2021)',  'Selenium, Playwright, API testing, SQL',         '/files/resume_6.pdf'),
-    (9, 'BSU, Applied Mathematics (2020)', 'SQL, Tableau, Excel, Python',                    '/files/resume_9.pdf');
+INSERT INTO `Resumes` (`Id`, `CandidateId`, `Headline`, `Summary`, `ExperienceYears`, `DesiredSalary`, `CreatedAt`, `UpdatedAt`) VALUES
+(1, 1, 'Senior .NET Developer', 'Веду разработку внутренних сервисов на .NET, отвечаю за архитектуру и код-ревью.', 7, 380000, DATE_SUB(NOW(), INTERVAL 30 DAY), NOW()),
+(2, 2, '.NET Developer', 'Разрабатываю бизнес-приложения на ASP.NET Core, есть опыт с React и CI.', 4, 280000, DATE_SUB(NOW(), INTERVAL 25 DAY), NOW()),
+(3, 3, 'HR Generalist', 'Веду полный цикл подбора: от брифа до оффера, выстраиваю процессы адаптации.', 5, 150000, DATE_SUB(NOW(), INTERVAL 20 DAY), NOW()),
+(4, 4, 'Product Designer', 'Проектирую интерфейсы B2B-продуктов, развиваю дизайн-систему и исследую пользователей.', 6, 230000, DATE_SUB(NOW(), INTERVAL 18 DAY), NOW()),
+(5, 5, 'Data Analyst', 'Собираю продуктовые метрики, строю отчёты и проверяю гипотезы на данных.', 3, 190000, DATE_SUB(NOW(), INTERVAL 12 DAY), NOW()),
+(6, 6, 'QA Engineer', 'Отвечаю за тестовую стратегию и автотесты API и UI.', 8, 170000, DATE_SUB(NOW(), INTERVAL 10 DAY), NOW());
 
-INSERT INTO Interviews (ResumeId, VacancyId, ScheduledAt, Mode, Result, Notes) VALUES
-    (1, 1, '2026-10-10 12:00:00', 2, 1, 'Strong backend fundamentals.'),
-    (1, 1, '2026-10-17 15:00:00', 0, 1, 'Onsite final: system design.'),
-    (2, 3, '2026-10-20 11:00:00', 1, 2, 'Not enough automation depth.'),
-    (3, 1, '2026-10-12 10:30:00', 2, 1, 'Good mid-level profile.'),
-    (3, 1, '2026-10-19 10:30:00', 0, 0, 'Final scheduled: team fit.'),
-    (5, 2, '2026-10-15 09:00:00', 0, 1, 'Relevant IT recruitment experience.'),
-    (6, 3, '2026-10-25 13:00:00', 2, 0, 'Tech screening.'),
-    (9, 4, '2026-10-05 14:00:00', 2, 1, 'Good SQL and dashboards.');
+INSERT INTO `ResumeDetails` (`ResumeId`, `Education`, `Skills`, `FilePath`) VALUES
+(1, 'БГУ, прикладная математика, 2017', 'C#, ASP.NET Core, EF Core, SQL, Docker', NULL),
+(2, 'БГУИР, программная инженерия, 2020', 'C#, ASP.NET Core, React, SQL', NULL),
+(3, 'БГЭУ, управление персоналом, 2019', 'Подбор, HR-аналитика, интервью, адаптация', NULL),
+(4, 'БГАИ, дизайн, 2018', 'Figma, UX research, дизайн-системы, прототипирование', NULL),
+(5, 'БГУ, экономика, 2021', 'SQL, Python, Power BI, A/B-тесты', NULL),
+(6, 'БНТУ, информационные системы, 2016', 'Playwright, Selenium, API testing, Postman', NULL);
 
-INSERT INTO Interviewers (FullName, Email, Position) VALUES
-    ('Aliaksei Kavalchuk', 'a.kavalchuk@hrms.local',  'Team Lead, Backend'),
-    ('Maryna Savitskaya',  'm.savitskaya@hrms.local', 'HR Director'),
-    ('Vadzim Lisitsa',     'v.lisitsa@hrms.local',    'Senior .NET Developer'),
-    ('Olga Novik',         'o.novik@hrms.local',      'QA Lead'),
-    ('Siarhei Baranau',    's.baranau@hrms.local',    'Data Engineering Lead');
+INSERT INTO `JobApplications` (`Id`, `CandidateId`, `VacancyId`, `Stage`, `AppliedAt`, `UpdatedAt`, `Source`, `Notes`) VALUES
+(1, 1, 1, 2, DATE_SUB(NOW(), INTERVAL 6 DAY), NOW(), 'Карьерный сайт', 'Сильное портфолио, назначено техническое интервью.'),
+(2, 2, 1, 1, DATE_SUB(NOW(), INTERVAL 4 DAY), NOW(), 'LinkedIn', NULL),
+(3, 3, 2, 3, DATE_SUB(NOW(), INTERVAL 8 DAY), NOW(), 'Рекомендация', NULL),
+(4, 4, 3, 2, DATE_SUB(NOW(), INTERVAL 3 DAY), NOW(), 'Карьерный сайт', NULL),
+(5, 5, 4, 0, DATE_SUB(NOW(), INTERVAL 2 DAY), NOW(), 'hh.ru', NULL),
+(6, 6, 5, 5, DATE_SUB(NOW(), INTERVAL 20 DAY), NOW(), 'hh.ru', 'Не совпал формат работы.'),
+(7, 2, 5, 6, DATE_SUB(NOW(), INTERVAL 18 DAY), NOW(), 'LinkedIn', NULL);
 
-INSERT INTO InterviewInterviewers (InterviewId, InterviewerId, Role) VALUES
-    (1, 1, 'Host'),      (1, 3, 'Technical'),
-    (2, 1, 'Host'),
-    (3, 4, 'Technical'),
-    (4, 3, 'Technical'), (4, 2, 'HR'),
-    (5, 1, 'Host'),      (5, 2, 'HR'),
-    (6, 2, 'Host'),
-    (7, 4, 'Technical'), (7, 1, 'Observer'),
-    (8, 5, 'Technical');
+INSERT INTO `ResumeVacancyMatches` (`ResumeId`, `VacancyId`, `Status`, `MatchScore`, `MatchedAt`, `Comment`) VALUES
+(1, 3, 0, 60, DATE_SUB(NOW(), INTERVAL 2 DAY), NULL),
+(2, 5, 0, 72, DATE_SUB(NOW(), INTERVAL 3 DAY), NULL),
+(5, 4, 1, 84, DATE_SUB(NOW(), INTERVAL 1 DAY), 'Ожидания по зарплате совпадают.'),
+(4, 3, 1, 88, DATE_SUB(NOW(), INTERVAL 2 DAY), 'Сильное портфолио.'),
+(3, 2, 1, 90, DATE_SUB(NOW(), INTERVAL 4 DAY), NULL);
+
+INSERT INTO `Interviewers` (`Id`, `FullName`, `Email`, `Position`) VALUES
+(1, 'Екатерина Орлова', 'ekaterina.orlova@hrms.local', 'HR Business Partner'),
+(2, 'Павел Кузнецов', 'pavel.kuznetsov@hrms.local', 'Tech Lead'),
+(3, 'Марина Белова', 'marina.belova@hrms.local', 'Product Lead'),
+(4, 'Сергей Волков', 'sergey.volkov@hrms.local', 'QA Lead');
+
+INSERT INTO `Interviews` (`Id`, `ApplicationId`, `ScheduledAt`, `Mode`, `Result`, `Notes`) VALUES
+(1, 1, DATE_ADD(NOW(), INTERVAL 1 DAY), 2, 0, 'Техническое интервью: архитектура и EF Core.'),
+(2, 3, DATE_ADD(NOW(), INTERVAL 2 DAY), 0, 0, 'Финальная встреча с командой HR.'),
+(3, 4, DATE_SUB(NOW(), INTERVAL 3 DAY), 2, 1, 'Портфолио и работа с дизайн-системой.'),
+(4, 6, DATE_SUB(NOW(), INTERVAL 10 DAY), 1, 2, 'Обсудили ожидания по формату работы.'),
+(5, 2, DATE_ADD(NOW(), INTERVAL 3 DAY), 0, 0, NULL);
+
+INSERT INTO `InterviewInterviewers` (`InterviewId`, `InterviewerId`, `Role`) VALUES
+(1, 2, 'Technical'),
+(1, 1, 'HR'),
+(2, 1, 'Host'),
+(3, 3, 'Host'),
+(4, 4, 'Technical'),
+(5, 2, 'Technical'),
+(5, 1, 'HR');

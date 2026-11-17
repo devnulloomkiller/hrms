@@ -1,5 +1,3 @@
-using Hrms.Domain.Enums;
-
 namespace Hrms.Domain.Entities;
 
 public class Resume
@@ -10,19 +8,20 @@ public class Resume
 
     public Candidate Candidate { get; set; } = null!;
 
-    public int? VacancyId { get; set; }
-
-    public Vacancy? Vacancy { get; set; }
+    /// <summary>Желаемая должность — по ней резюме проще сопоставлять с вакансией.</summary>
+    public required string Headline { get; set; }
 
     public required string Summary { get; set; }
 
     public int ExperienceYears { get; set; }
 
-    public DateTime SubmittedAt { get; set; }
+    public decimal? DesiredSalary { get; set; }
 
-    public ResumeStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public ResumeDetails? Details { get; set; }
 
-    public List<Interview> Interviews { get; set; } = [];
+    public List<ResumeVacancyMatch> VacancyMatches { get; set; } = [];
 }

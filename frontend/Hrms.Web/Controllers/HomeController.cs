@@ -1,27 +1,25 @@
 using System.Diagnostics;
 using Hrms.Application.Interfaces;
-using Hrms.Domain.Entities;
 using Hrms.Domain.Enums;
 using Hrms.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hrms.Web.Controllers;
 
+[Authorize]
 public class HomeController(
     IVacancyService vacancies,
     ICandidateService candidates,
-    IResumeService resumes,
+    IJobApplicationService applications,
     IInterviewService interviews) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        if (User.Identity?.IsAuthenticated != true)
-            return View(new DashboardViewModel());
-
-        var allVacancies = await vacancies.GetAllAsync(ct);
-        var allCandidates = await candidates.GetAllAsync(ct);
-        var allResumes = await resumes.GetAllAsync(ct);
-        var allInterviews = await interviews.GetAllAsync(ct);
+        var allVacancies = await vacancies.GetAllAsync(null, ct);
+        var allCandidates = await candidates.GetAllAsync(null, ct);
+        var allApplications = await applications.GetAllAsync(null, ct);
+        var allInterviews = await interviews.GetAllAsync(null, ct);
 
         var now = DateTime.Now;
         var today = DateOnly.FromDateTime(now);
@@ -30,12 +28,17 @@ public class HomeController(
             .OrderBy(i => i.ScheduledAt)
             .ToList();
 
+        var pipeline = Enum.GetValues<ApplicationStage>()
+            .ToDictionary(stage => stage, stage => allApplications.Count(a => a.Stage == stage));
+
         return View(new DashboardViewModel
         {
             OpenVacancies = allVacancies.Count(v => v.Status == VacancyStatus.Open),
             TotalCandidates = allCandidates.Count,
-            ActiveResumes = allResumes.Count(r => r.Status is ResumeStatus.New or ResumeStatus.InReview),
+            ActiveApplications = allApplications.Count(a => a.Stage is
+                ApplicationStage.Applied or ApplicationStage.Screening or ApplicationStage.Interview or ApplicationStage.Offer),
             UpcomingInterviewsCount = upcoming.Count,
+            HiredCount = pipeline[ApplicationStage.Hired],
             UpcomingInterviews = upcoming.Take(5).ToList(),
             ExpiringVacancies = allVacancies
                 .Where(v => v.Status == VacancyStatus.Open
@@ -45,15 +48,12 @@ public class HomeController(
                 .OrderBy(v => v.AcceptingResumesUntil)
                 .Take(5)
                 .ToList(),
-            RecentResumes = allResumes.Take(5).ToList(),
+            RecentApplications = allApplications.Take(5).ToList(),
+            Pipeline = pipeline,
         });
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

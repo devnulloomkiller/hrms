@@ -1,0 +1,93 @@
+@model Hrms.Domain.Entities.JobApplication
+@using Hrms.Application.DTOs
+@using Hrms.Domain.Enums
+@{
+    var isEdit = Model.Id != 0;
+    ViewData["Title"] = isEdit ? $"Изменить отклик #{Model.Id}" : "Новый отклик";
+    var candidates = ViewBag.Candidates as List<CandidateOptionDto> ?? [];
+    var vacancies = ViewBag.Vacancies as List<VacancyOptionDto> ?? [];
+}
+<header class="page-header">
+    <div class="page-header-copy">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-description">Отклик связывает кандидата с вакансией и задаёт его этап в воронке.</p>
+    </div>
+</header>
+<div class="card form-card">
+    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+        @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+        @if (candidates.Count == 0) {
+            <div class="empty-state">
+                <h2>Нет кандидатов с резюме</h2>
+                <p>Отклик можно создать только для кандидата с заполненным резюме. Добавьте резюме в карточке кандидата.</p>
+                <a asp-controller="Candidates" asp-action="Create" class="btn btn-primary">Добавить кандидата</a>
+            </div>
+        } else {
+            <fieldset class="form-section">
+                <legend class="form-section-title">Кто и куда</legend>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="candidateId">Кандидат</label>
+                        <select id="candidateId" name="candidateId" class="form-select" required>
+                            <option value="">Выберите кандидата</option>
+                            @foreach (var candidate in candidates) {
+                                <option value="@candidate.Id" selected="@(Model.CandidateId == candidate.Id)">
+                                    @candidate.FullName · @candidate.Headline · @candidate.ExperienceYears л.
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="vacancyId">Вакансия</label>
+                        <select id="vacancyId" name="vacancyId" class="form-select" required>
+                            <option value="">Выберите вакансию</option>
+                            @foreach (var vacancy in vacancies) {
+                                <option value="@vacancy.Id" selected="@(Model.VacancyId == vacancy.Id)">
+                                    @vacancy.Title · @vacancy.Department · @vacancy.Status.Ru()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <p class="form-hint">Один кандидат может откликнуться на одну вакансию только один раз.</p>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend class="form-section-title">Этап и контекст</legend>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="stage">Этап</label>
+                        <select id="stage" name="stage" class="form-select">
+                            @foreach (var value in Enum.GetValues<ApplicationStage>()) {
+                                <option value="@value" selected="@(Model.Stage == value)">@value.Ru()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="appliedAt">Дата отклика</label>
+                        <input id="appliedAt" name="appliedAt" class="form-control" type="datetime-local" value="@Model.AppliedAt.ToString("yyyy-MM-ddTHH:mm")" required />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="source">Источник</label>
+                        <input id="source" name="source" value="@Model.Source" class="form-control" placeholder="hh.ru, LinkedIn, рекомендация" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="notes">Заметки</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="4" placeholder="Что важно знать об отклике">@Model.Notes</textarea>
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Сохранить отклик</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+                @if (isEdit) {
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger ms-auto">Удалить отклик</a>
+                }
+            </div>
+        }
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

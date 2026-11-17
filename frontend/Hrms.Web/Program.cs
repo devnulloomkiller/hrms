@@ -36,6 +36,8 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedRolesAndAdminAsync(
         scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
         scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+
+    await DbInitializer.SeedDemoDataAsync(db);
 }
 
 if (!app.Environment.IsDevelopment())

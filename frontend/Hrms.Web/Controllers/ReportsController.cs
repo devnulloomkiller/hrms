@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+using Hrms.Application.DTOs;
 using Hrms.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Hrms.Web.Controllers;
 
@@ -16,11 +18,11 @@ public class ReportsController(IReportService reports, ICandidateService candida
 
     public async Task<IActionResult> CandidateProfile(int? id, CancellationToken ct)
     {
-        ViewBag.Candidates = (await candidates.GetAllAsync(ct))
-            .Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(
-                $"{c.LastName} {c.FirstName}", c.Id.ToString()))
+        ViewBag.Candidates = (await candidates.GetOptionsAsync(false, ct))
+            .Select(c => new SelectListItem($"{c.FullName} · {c.Headline}", c.Id.ToString()))
             .ToList();
-        if (id is null) return View((Hrms.Application.DTOs.CandidateProfileDto?)null);
+
+        if (id is null) return View((CandidateProfileDto?)null);
         var profile = await reports.GetCandidateProfileAsync(id.Value, ct);
         if (profile is null) return NotFound();
         return View(profile);
@@ -34,4 +36,7 @@ public class ReportsController(IReportService reports, ICandidateService candida
             DateTime.Parse(ViewBag.From), DateTime.Parse(ViewBag.To), ct);
         return View(list);
     }
+
+    public async Task<IActionResult> Pipeline(CancellationToken ct) =>
+        View(await reports.GetPipelineByVacancyAsync(ct));
 }

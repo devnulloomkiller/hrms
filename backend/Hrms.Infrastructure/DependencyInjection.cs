@@ -9,11 +9,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<ApplicationDbContext>(o => o.UseMySQL(connectionString));
+        services.AddDbContext<ApplicationDbContext>(o =>
+            o.UseMySQL(connectionString, mysql =>
+                mysql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
         services.AddScoped(typeof(IHrmsRepository<>), typeof(EfRepository<>));
         services.AddScoped<IVacancyService, Hrms.Application.Services.VacancyService>();
         services.AddScoped<ICandidateService, Hrms.Application.Services.CandidateService>();
         services.AddScoped<IResumeService, Hrms.Application.Services.ResumeService>();
+        services.AddScoped<IJobApplicationService, Hrms.Application.Services.JobApplicationService>();
         services.AddScoped<IInterviewService, Hrms.Application.Services.InterviewService>();
         services.AddScoped<IReportService, Hrms.Application.Services.ReportService>();
         return services;

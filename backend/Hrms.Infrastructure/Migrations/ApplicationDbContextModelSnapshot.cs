@@ -15,7 +15,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261116182558_InitialCreate";
+    public override string LastMigrationId => "20261117175157_RestructureHiringPipeline";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -46,7 +46,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("varchar(100)");
 
                 b.Property<string>("Phone")
-                    .HasColumnType("longtext");
+                    .HasMaxLength(40)
+                    .HasColumnType("varchar(40)");
 
                 b.HasKey("Id");
 
@@ -62,6 +63,9 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
+                b.Property<int>("ApplicationId")
+                    .HasColumnType("int");
+
                 b.Property<int>("Mode")
                     .HasColumnType("int");
 
@@ -71,22 +75,14 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Property<int>("Result")
                     .HasColumnType("int");
 
-                b.Property<int>("ResumeId")
-                    .HasColumnType("int");
-
                 b.Property<DateTime>("ScheduledAt")
                     .HasColumnType("datetime(6)");
 
-                b.Property<int>("VacancyId")
-                    .HasColumnType("int");
-
                 b.HasKey("Id");
 
-                b.HasIndex("ResumeId");
+                b.HasIndex("ApplicationId");
 
                 b.HasIndex("ScheduledAt");
-
-                b.HasIndex("VacancyId");
 
                 b.ToTable("Interviews");
             });
@@ -127,7 +123,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("varchar(200)");
 
                 b.Property<string>("Position")
-                    .HasColumnType("longtext");
+                    .HasMaxLength(200)
+                    .HasColumnType("varchar(200)");
 
                 b.HasKey("Id");
 
@@ -135,6 +132,49 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .IsUnique();
 
                 b.ToTable("Interviewers");
+            });
+
+        modelBuilder.Entity("Hrms.Domain.Entities.JobApplication", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("AppliedAt")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<int>("CandidateId")
+                    .HasColumnType("int");
+
+                b.Property<string>("Notes")
+                    .HasMaxLength(1000)
+                    .HasColumnType("varchar(1000)");
+
+                b.Property<string>("Source")
+                    .HasMaxLength(100)
+                    .HasColumnType("varchar(100)");
+
+                b.Property<int>("Stage")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<int>("VacancyId")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.HasIndex("AppliedAt");
+
+                b.HasIndex("Stage");
+
+                b.HasIndex("VacancyId");
+
+                b.HasIndex("CandidateId", "VacancyId")
+                    .IsUnique();
+
+                b.ToTable("JobApplications");
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.Resume", b =>
@@ -146,32 +186,40 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Property<int>("CandidateId")
                     .HasColumnType("int");
 
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<decimal?>("DesiredSalary")
+                    .HasPrecision(12, 2)
+                    .HasColumnType("decimal(12,2)");
+
                 b.Property<int>("ExperienceYears")
                     .HasColumnType("int");
 
-                b.Property<int>("Status")
-                    .HasColumnType("int");
-
-                b.Property<DateTime>("SubmittedAt")
-                    .HasColumnType("datetime(6)");
+                b.Property<string>("Headline")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("varchar(200)");
 
                 b.Property<string>("Summary")
                     .IsRequired()
                     .HasMaxLength(2000)
                     .HasColumnType("varchar(2000)");
 
-                b.Property<int?>("VacancyId")
-                    .HasColumnType("int");
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
                 b.HasKey("Id");
 
-                b.HasIndex("CandidateId");
+                b.HasIndex("CandidateId")
+                    .IsUnique();
 
-                b.HasIndex("Status");
+                b.HasIndex("ExperienceYears");
 
-                b.HasIndex("VacancyId");
-
-                b.ToTable("Resumes");
+                b.ToTable("Resumes", t =>
+                    {
+                        t.HasCheckConstraint("CK_Resume_Experience", "`ExperienceYears` >= 0");
+                    });
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.ResumeDetails", b =>
@@ -196,13 +244,46 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("ResumeDetails");
             });
 
+        modelBuilder.Entity("Hrms.Domain.Entities.ResumeVacancyMatch", b =>
+            {
+                b.Property<int>("ResumeId")
+                    .HasColumnType("int");
+
+                b.Property<int>("VacancyId")
+                    .HasColumnType("int");
+
+                b.Property<string>("Comment")
+                    .HasMaxLength(500)
+                    .HasColumnType("varchar(500)");
+
+                b.Property<int?>("MatchScore")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("MatchedAt")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<int>("Status")
+                    .HasColumnType("int");
+
+                b.HasKey("ResumeId", "VacancyId");
+
+                b.HasIndex("Status");
+
+                b.HasIndex("VacancyId");
+
+                b.ToTable("ResumeVacancyMatches", t =>
+                    {
+                        t.HasCheckConstraint("CK_Match_Score", "`MatchScore` IS NULL OR (`MatchScore` >= 0 AND `MatchScore` <= 100)");
+                    });
+            });
+
         modelBuilder.Entity("Hrms.Domain.Entities.Vacancy", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                b.Property<DateOnly?>("AcceptingResumesUntil")
+                b.Property<DateTime?>("AcceptingResumesUntil")
                     .HasColumnType("date");
 
                 b.Property<string>("Department")
@@ -211,10 +292,18 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("varchar(100)");
 
                 b.Property<string>("Description")
-                    .HasColumnType("longtext");
+                    .HasMaxLength(4000)
+                    .HasColumnType("varchar(4000)");
 
-                b.Property<DateOnly>("PublishedAt")
+                b.Property<int>("MinExperience")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("PublishedAt")
                     .HasColumnType("date");
+
+                b.Property<string>("RequiredSkills")
+                    .HasMaxLength(1000)
+                    .HasColumnType("varchar(1000)");
 
                 b.Property<decimal?>("SalaryMax")
                     .HasPrecision(12, 2)
@@ -234,8 +323,12 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
                 b.HasKey("Id");
 
+                b.HasIndex("Status");
+
                 b.ToTable("Vacancies", t =>
                     {
+                        t.HasCheckConstraint("CK_Vacancy_MinExperience", "`MinExperience` >= 0");
+
                         t.HasCheckConstraint("CK_Vacancy_SalaryRange", "`SalaryMax` IS NULL OR `SalaryMax` >= `SalaryMin`");
                     });
             });
@@ -437,21 +530,13 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("Hrms.Domain.Entities.Interview", b =>
             {
-                b.HasOne("Hrms.Domain.Entities.Resume", "Resume")
+                b.HasOne("Hrms.Domain.Entities.JobApplication", "Application")
                     .WithMany("Interviews")
-                    .HasForeignKey("ResumeId")
+                    .HasForeignKey("ApplicationId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
-                b.HasOne("Hrms.Domain.Entities.Vacancy", "Vacancy")
-                    .WithMany("Interviews")
-                    .HasForeignKey("VacancyId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
-
-                b.Navigation("Resume");
-
-                b.Navigation("Vacancy");
+                b.Navigation("Application");
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.InterviewInterviewer", b =>
@@ -473,22 +558,34 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Interviewer");
             });
 
-        modelBuilder.Entity("Hrms.Domain.Entities.Resume", b =>
+        modelBuilder.Entity("Hrms.Domain.Entities.JobApplication", b =>
             {
                 b.HasOne("Hrms.Domain.Entities.Candidate", "Candidate")
-                    .WithMany("Resumes")
+                    .WithMany("Applications")
                     .HasForeignKey("CandidateId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Hrms.Domain.Entities.Vacancy", "Vacancy")
-                    .WithMany()
+                    .WithMany("Applications")
                     .HasForeignKey("VacancyId")
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
 
                 b.Navigation("Candidate");
 
                 b.Navigation("Vacancy");
+            });
+
+        modelBuilder.Entity("Hrms.Domain.Entities.Resume", b =>
+            {
+                b.HasOne("Hrms.Domain.Entities.Candidate", "Candidate")
+                    .WithOne("Resume")
+                    .HasForeignKey("Hrms.Domain.Entities.Resume", "CandidateId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Candidate");
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.ResumeDetails", b =>
@@ -500,6 +597,25 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
 
                 b.Navigation("Resume");
+            });
+
+        modelBuilder.Entity("Hrms.Domain.Entities.ResumeVacancyMatch", b =>
+            {
+                b.HasOne("Hrms.Domain.Entities.Resume", "Resume")
+                    .WithMany("VacancyMatches")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("Hrms.Domain.Entities.Vacancy", "Vacancy")
+                    .WithMany("ResumeMatches")
+                    .HasForeignKey("VacancyId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Resume");
+
+                b.Navigation("Vacancy");
             });
 
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -555,7 +671,9 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("Hrms.Domain.Entities.Candidate", b =>
             {
-                b.Navigation("Resumes");
+                b.Navigation("Applications");
+
+                b.Navigation("Resume");
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.Interview", b =>
@@ -568,16 +686,23 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Interviews");
             });
 
+        modelBuilder.Entity("Hrms.Domain.Entities.JobApplication", b =>
+            {
+                b.Navigation("Interviews");
+            });
+
         modelBuilder.Entity("Hrms.Domain.Entities.Resume", b =>
             {
                 b.Navigation("Details");
 
-                b.Navigation("Interviews");
+                b.Navigation("VacancyMatches");
             });
 
         modelBuilder.Entity("Hrms.Domain.Entities.Vacancy", b =>
             {
-                b.Navigation("Interviews");
+                b.Navigation("Applications");
+
+                b.Navigation("ResumeMatches");
             });
 #pragma warning restore 612, 618
     }

@@ -6,7 +6,7 @@
 <header class="page-header">
     <div class="page-header-copy">
         <h1 class="page-title">Профиль кандидата</h1>
-        <p class="page-description">Все резюме и собеседования выбранного кандидата.</p>
+        <p class="page-description">Резюме, отклики, собеседования и подборы выбранного кандидата.</p>
     </div>
 </header>
 <partial name="_ReportNavigation" />
@@ -22,58 +22,96 @@
 @if (Model is null) {
     <section class="empty-state">
         <h2>Кандидат не выбран</h2>
-        <p>Выберите кандидата в поле выше, чтобы увидеть его контакты, резюме и историю собеседований.</p>
+        <p>Выберите кандидата в поле выше, чтобы увидеть его резюме, отклики и историю собеседований.</p>
     </section>
 } else {
     <section class="profile-summary" aria-labelledby="candidate-name">
         <div>
             <h2 id="candidate-name">@Model.FullName</h2>
             <p class="text-muted mb-0">@Model.Email @(string.IsNullOrEmpty(Model.Phone) ? "" : $"· {Model.Phone}")</p>
+            <p class="text-muted mb-0">@(Model.Headline ?? "Резюме не заполнено") · @Model.ExperienceYears л. опыта · @(Model.DesiredSalary is { } salary ? $"{salary:N0} ₽" : "зарплата не указана")</p>
         </div>
         <dl class="profile-metrics">
-            <div><dt>Резюме</dt><dd>@Model.TotalResumes</dd></div>
+            <div><dt>Отклики</dt><dd>@Model.TotalApplications</dd></div>
             <div><dt>Собеседования</dt><dd>@Model.TotalInterviews</dd></div>
+            <div><dt>Подборы</dt><dd>@Model.Matches.Count</dd></div>
         </dl>
     </section>
-    @if (Model.Resumes.Count == 0) {
-        <section class="empty-state">
-            <h2>У кандидата нет резюме</h2>
-            <p>Добавьте резюме, чтобы отслеживать отклики и собеседования кандидата.</p>
-            <a asp-controller="Resumes" asp-action="Create" class="btn btn-primary">Добавить резюме</a>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Summary)) {
+        <section class="card detail-card mt-3">
+            <h2>Резюме</h2>
+            <p>@Model.Summary</p>
+            @if (!string.IsNullOrWhiteSpace(Model.Skills)) {
+                <div class="skill-chips" aria-label="Навыки">
+                    @foreach (var skill in Model.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) {
+                        <span class="skill-chip">@skill</span>
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Education)) {
+                <p class="text-muted small mb-0">Образование: @Model.Education</p>
+            }
         </section>
     }
-    @foreach (var r in Model.Resumes) {
-        <article class="card mb-3">
-            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <span class="fw-semibold">Резюме #@r.ResumeId на вакансию «@(r.VacancyTitle ?? "не указана")»</span>
-                <span class="d-flex flex-wrap gap-2 align-items-center">
-                    @Html.Raw(r.Status.Pill())
-                    <span class="text-muted small">@r.ExperienceYears л. · @r.SubmittedAt.ToString("dd.MM.yyyy")</span>
-                </span>
+
+    <section class="mt-4" aria-labelledby="profile-applications">
+        <h2 id="profile-applications">Отклики</h2>
+        @if (Model.Applications.Count == 0) {
+            <div class="empty-state mt-3">
+                <h3>Откликов нет</h3>
+                <p>Кандидат пока не откликался на вакансии.</p>
+                <a asp-controller="Applications" asp-action="Create" asp-route-candidateId="@Model.CandidateId" class="btn btn-primary">Добавить отклик</a>
             </div>
-            <div class="card-body">
-                @if (r.Interviews.Count == 0) {
-                    <span class="text-muted">По этому резюме собеседования ещё не назначены.</span>
-                } else {
-                    <div class="table-wrap">
-                        <table class="table table-sm align-middle">
-                            <caption class="visually-hidden">Собеседования по резюме #@r.ResumeId</caption>
-                            <thead><tr><th>Дата</th><th>Вакансия</th><th>Формат</th><th>Итог</th><th>Участники</th></tr></thead>
-                            <tbody>
-                            @foreach (var i in r.Interviews) {
-                                <tr>
-                                    <td class="font-mono text-nowrap">@i.ScheduledAt.ToString("dd.MM HH:mm")</td>
-                                    <td>@i.VacancyTitle</td>
-                                    <td>@Html.Raw(i.Mode.Pill())</td>
-                                    <td>@Html.Raw(i.Result.Pill())</td>
-                                    <td class="text-muted small">@string.Join(", ", i.Participants)</td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                }
+        } else {
+            <div class="card table-card mt-3">
+                <div class="table-wrap">
+                    <table class="table table-hover align-middle">
+                        <caption class="visually-hidden">Отклики кандидата @Model.FullName</caption>
+                        <thead><tr><th>Вакансия</th><th>Этап</th><th>Дата</th><th>Собеседования</th></tr></thead>
+                        <tbody>
+                        @foreach (var application in Model.Applications) {
+                            <tr>
+                                <td><a asp-controller="Vacancies" asp-action="Details" asp-route-id="@application.VacancyId" class="text-decoration-none fw-semibold">@application.VacancyTitle</a><span class="table-subtext">@application.Department</span></td>
+                                <td>@Html.Raw(application.Stage.Pill())</td>
+                                <td class="font-mono">@application.AppliedAt.ToString("dd.MM.yyyy")</td>
+                                <td>@application.InterviewCount</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </article>
-    }
+        }
+    </section>
+
+    <section class="mt-4" aria-labelledby="profile-matches">
+        <h2 id="profile-matches">Подборы</h2>
+        @if (Model.Matches.Count == 0) {
+            <div class="empty-state mt-3">
+                <h3>Подборов нет</h3>
+                <p>Запустите подбор вакансий из карточки кандидата.</p>
+                <a asp-controller="Candidates" asp-action="Match" asp-route-id="@Model.CandidateId" class="btn btn-primary">Подобрать вакансии</a>
+            </div>
+        } else {
+            <div class="card table-card mt-3">
+                <div class="table-wrap">
+                    <table class="table table-hover align-middle">
+                        <caption class="visually-hidden">Подобранные вакансии</caption>
+                        <thead><tr><th>Вакансия</th><th>Статус вакансии</th><th>Подбор</th><th>Соответствие</th></tr></thead>
+                        <tbody>
+                        @foreach (var match in Model.Matches) {
+                            <tr>
+                                <td><a asp-controller="Vacancies" asp-action="Details" asp-route-id="@match.VacancyId" class="text-decoration-none fw-semibold">@match.VacancyTitle</a><span class="table-subtext">@match.Department</span></td>
+                                <td>@Html.Raw(match.Status.Pill())</td>
+                                <td>@Html.Raw(match.MatchStatus.Pill())</td>
+                                <td><span class="score">@(match.MatchScore ?? 0)%</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </section>
 }

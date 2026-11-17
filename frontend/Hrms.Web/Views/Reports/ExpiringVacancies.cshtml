@@ -10,7 +10,7 @@
 <form method="get" class="filter-bar">
     <div class="filter-field">
         <label class="form-label" for="days">Период в днях</label>
-        <input id="days" type="number" class="form-control days-input" name="days" value="@ViewBag.Days" min="1" max="90" />
+        <input id="days" type="number" class="form-control days-input" name="days" value="@ViewBag.Days" min="1" max="90" inputmode="numeric" />
     </div>
     <button type="submit" class="btn btn-outline-primary">Показать вакансии</button>
 </form>
@@ -24,15 +24,16 @@
         <div class="table-wrap">
             <table class="table table-hover align-middle">
                 <caption class="visually-hidden">Вакансии с приближающимся сроком приёма резюме</caption>
-                <thead><tr><th>Вакансия</th><th>Отдел</th><th>Дедлайн</th><th>Осталось дней</th><th>Резюме</th></tr></thead>
+                <thead><tr><th>Вакансия</th><th>Отдел</th><th>Дедлайн</th><th>Осталось дней</th><th>Отклики</th><th>В подборе</th></tr></thead>
                 <tbody>
-                @foreach (var v in Model) {
-                    <tr class="@(v.DaysLeft <= 3 ? "row-danger" : v.DaysLeft <= 7 ? "row-warning" : "")">
-                        <td><a asp-controller="Vacancies" asp-action="Details" asp-route-id="@v.VacancyId" class="text-decoration-none fw-semibold">@v.Title</a></td>
-                        <td class="text-muted">@v.Department</td>
-                        <td class="font-mono">@v.AcceptingResumesUntil.ToString("dd.MM.yyyy")</td>
-                        <td>@v.DaysLeft</td>
-                        <td>@v.ResumeCount</td>
+                @foreach (var vacancy in Model) {
+                    <tr class="@(vacancy.DaysLeft <= 3 ? "row-danger" : vacancy.DaysLeft <= 7 ? "row-warning" : "")">
+                        <td><a asp-controller="Vacancies" asp-action="Details" asp-route-id="@vacancy.VacancyId" class="text-decoration-none fw-semibold">@vacancy.Title</a></td>
+                        <td class="text-muted">@vacancy.Department</td>
+                        <td class="font-mono">@vacancy.AcceptingResumesUntil.ToString("dd.MM.yyyy")</td>
+                        <td>@vacancy.DaysLeft</td>
+                        <td>@vacancy.ApplicationCount</td>
+                        <td>@vacancy.MatchedResumeCount</td>
                     </tr>
                 }
                 </tbody>

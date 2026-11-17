@@ -1,40 +1,114 @@
 @model Hrms.Domain.Entities.Candidate
-@{ ViewData["Title"] = $"{Model.LastName} {Model.FirstName}"; }
+@using Hrms.Domain.Enums
+@{
+    ViewData["Title"] = $"{Model.LastName} {Model.FirstName}";
+    var resume = Model.Resume;
+    var activeApplications = Model.Applications.Count(a => a.Stage is ApplicationStage.Applied or ApplicationStage.Screening or ApplicationStage.Interview or ApplicationStage.Offer);
+    var matches = resume?.VacancyMatches ?? new List<Hrms.Domain.Entities.ResumeVacancyMatch>();
+    var fileUrl = resume?.Details?.FilePath;
+    var safeFileUrl = Uri.TryCreate(fileUrl, UriKind.Absolute, out var fileUri)
+        && (fileUri.Scheme == Uri.UriSchemeHttp || fileUri.Scheme == Uri.UriSchemeHttps)
+        ? fileUrl
+        : null;
+}
 <header class="page-header">
     <div class="page-header-copy">
+        <p class="section-label">Карточка кандидата</p>
         <h1 class="page-title">@Model.LastName @Model.FirstName</h1>
-        <p class="page-description">Контакты и история откликов кандидата.</p>
+        <p class="page-description">@(resume?.Headline ?? "Резюме не заполнено") · @(resume is null ? "нет опыта" : $"{resume.ExperienceYears} лет опыта")</p>
     </div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Изменить кандидата</a>
+    <div class="page-header-actions">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Изменить</a>
+        <a asp-controller="Applications" asp-action="Create" asp-route-candidateId="@Model.Id" class="btn btn-primary">Добавить отклик</a>
+    </div>
 </header>
-<div class="card detail-card">
-    <dl class="row g-3 mb-0">
-        <dt class="col-sm-3">Email</dt><dd class="col-sm-9"><a href="mailto:@Model.Email">@Model.Email</a></dd>
-        <dt class="col-sm-3">Телефон</dt><dd class="col-sm-9">@(Model.Phone ?? "Не указан")</dd>
-    </dl>
+
+<section class="stat-strip" aria-label="Сводка по кандидату">
+    <div class="stat-item"><span>Отклики</span><strong>@Model.Applications.Count</strong></div>
+    <div class="stat-item"><span>В работе</span><strong>@activeApplications</strong></div>
+    <div class="stat-item"><span>Собеседования</span><strong>@Model.Applications.Sum(a => a.Interviews.Count)</strong></div>
+    <div class="stat-item"><span>Подборы</span><strong>@matches.Count</strong></div>
+</section>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <section class="card detail-card h-100" aria-labelledby="contacts-title">
+            <h2 id="contacts-title">Контакты</h2>
+            <dl class="detail-list">
+                <dt>Email</dt><dd><a href="mailto:@Model.Email">@Model.Email</a></dd>
+                <dt>Телефон</dt><dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "Не указан" : Model.Phone)</dd>
+                <dt>Желаемая зарплата</dt><dd>@(resume?.DesiredSalary is { } salary ? $"{salary:N0} ₽" : "Не указана")</dd>
+                <dt>Образование</dt><dd>@(string.IsNullOrWhiteSpace(resume?.Details?.Education) ? "Не указано" : resume.Details.Education)</dd>
+                <dt>Файл резюме</dt>
+                <dd>
+                    @if (safeFileUrl is not null) {
+                        <a href="@safeFileUrl" target="_blank" rel="noopener noreferrer">Открыть файл</a>
+                    } else {
+                        <span class="text-muted">Не приложен</span>
+                    }
+                </dd>
+            </dl>
+        </section>
+    </div>
+    <div class="col-lg-7">
+        <section class="card detail-card h-100" aria-labelledby="resume-title">
+            <div class="card-heading-row">
+                <h2 id="resume-title">Резюме</h2>
+                @if (resume is not null) {
+                    <a asp-controller="Resumes" asp-action="Details" asp-route-id="@resume.Id" class="btn btn-sm btn-outline-secondary">Открыть резюме</a>
+                }
+            </div>
+            @if (resume is null) {
+                <p class="text-muted mb-3">У кандидата пока нет резюме — без него нельзя создать отклик.</p>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Заполнить резюме</a>
+            } else {
+                @if (!string.IsNullOrWhiteSpace(resume.Details?.Skills)) {
+                    <div class="skill-chips" aria-label="Навыки">
+                        @foreach (var skill in resume.Details.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) {
+                            <span class="skill-chip">@skill</span>
+                        }
+                    </div>
+                }
+                <p class="resume-summary">@resume.Summary</p>
+                <p class="text-muted small mb-0">Обновлено @resume.UpdatedAt.ToString("dd.MM.yyyy")</p>
+            }
+        </section>
+    </div>
 </div>
-<section aria-labelledby="candidate-resumes" class="mt-4">
-    <h2 id="candidate-resumes">Резюме (@Model.Resumes.Count)</h2>
-    @if (Model.Resumes.Count == 0) {
+
+<section class="mt-4" aria-labelledby="applications-title">
+    <div class="section-heading-row">
+        <div>
+            <h2 id="applications-title">Отклики на вакансии</h2>
+            <p class="page-description">Все вакансии, на которые кандидат откликнулся, и текущий этап.</p>
+        </div>
+        <a asp-controller="Applications" asp-action="Create" asp-route-candidateId="@Model.Id" class="btn btn-outline-secondary">Новый отклик</a>
+    </div>
+    @if (Model.Applications.Count == 0) {
         <div class="empty-state mt-3">
-            <h3>У кандидата нет резюме</h3>
-            <p>Добавьте резюме, чтобы связать кандидата с вакансией.</p>
-            <a asp-controller="Resumes" asp-action="Create" class="btn btn-primary">Добавить резюме</a>
+            <h3>Откликов пока нет</h3>
+            <p>Создайте отклик, когда кандидат откликнется на одну из вакансий.</p>
+            <a asp-controller="Applications" asp-action="Create" asp-route-candidateId="@Model.Id" class="btn btn-primary">Добавить отклик</a>
         </div>
     } else {
-        <div class="card table-card mt-3">
+        <div class="card table-card responsive-table-card mt-3">
             <div class="table-wrap">
-                <table class="table">
-                    <caption class="visually-hidden">Резюме кандидата @Model.LastName @Model.FirstName</caption>
-                    <thead><tr><th>Должность</th><th>Опыт</th><th>Статус</th><th>Подано</th><th></th></tr></thead>
+                <table class="table table-hover align-middle responsive-table">
+                    <caption class="visually-hidden">Отклики кандидата @Model.LastName @Model.FirstName</caption>
+                    <thead><tr><th>Вакансия</th><th>Этап</th><th>Дата отклика</th><th>Собеседования</th><th class="text-end">Действия</th></tr></thead>
                     <tbody>
-                    @foreach (var r in Model.Resumes) {
+                    @foreach (var application in Model.Applications.OrderByDescending(a => a.AppliedAt)) {
                         <tr>
-                            <td>@(r.Vacancy?.Title ?? "Без вакансии")</td>
-                            <td>@r.ExperienceYears л.</td>
-                            <td>@Html.Raw(r.Status.Pill())</td>
-                            <td>@r.SubmittedAt.ToString("dd.MM.yyyy")</td>
-                            <td class="text-end"><a asp-controller="Resumes" asp-action="Details" asp-route-id="@r.Id">Подробнее</a></td>
+                            <td data-label="Вакансия">
+                                <a asp-controller="Vacancies" asp-action="Details" asp-route-id="@application.VacancyId" class="text-decoration-none fw-semibold">@application.Vacancy.Title</a>
+                                <span class="table-subtext">@application.Vacancy.Department</span>
+                            </td>
+                            <td data-label="Этап">@Html.Raw(application.Stage.Pill())</td>
+                            <td data-label="Дата отклика" class="font-mono text-nowrap">@application.AppliedAt.ToString("dd.MM.yyyy")</td>
+                            <td data-label="Собеседования">@application.Interviews.Count</td>
+                            <td data-label="Действия" class="text-end text-nowrap">
+                                <a asp-controller="Applications" asp-action="Edit" asp-route-id="@application.Id" class="btn btn-sm btn-outline-secondary">Изменить</a>
+                            </td>
                         </tr>
                     }
                     </tbody>
@@ -43,6 +117,56 @@
         </div>
     }
 </section>
-<div class="form-actions">
+
+<section class="mt-4" aria-labelledby="matches-title">
+    <div class="section-heading-row">
+        <div>
+            <h2 id="matches-title">Подобранные вакансии</h2>
+            <p class="page-description">Вакансии, которые HR сохранил для этого резюме по фильтрам и оценке соответствия.</p>
+        </div>
+        <a asp-action="Match" asp-route-id="@Model.Id" class="btn btn-outline-primary">Подобрать вакансии</a>
+    </div>
+    @if (matches.Count == 0) {
+        <div class="empty-state mt-3">
+            <h3>Подборок пока нет</h3>
+            <p>Запустите подбор — система покажет открытые вакансии, подходящие по опыту, навыкам и зарплате.</p>
+            <a asp-action="Match" asp-route-id="@Model.Id" class="btn btn-primary">Подобрать вакансии</a>
+        </div>
+    } else {
+        <div class="card table-card responsive-table-card mt-3">
+            <div class="table-wrap">
+                <table class="table table-hover align-middle responsive-table">
+                    <caption class="visually-hidden">Вакансии, подобранные кандидату</caption>
+                    <thead><tr><th>Вакансия</th><th>Статус вакансии</th><th>Подбор</th><th>Соответствие</th><th class="text-end">Действия</th></tr></thead>
+                    <tbody>
+                    @foreach (var match in matches.OrderByDescending(m => m.MatchScore)) {
+                        <tr>
+                            <td data-label="Вакансия">
+                                <a asp-controller="Vacancies" asp-action="Details" asp-route-id="@match.VacancyId" class="text-decoration-none fw-semibold">@match.Vacancy.Title</a>
+                                <span class="table-subtext">@match.Vacancy.Department</span>
+                            </td>
+                            <td data-label="Статус вакансии">@Html.Raw(match.Vacancy.Status.Pill())</td>
+                            <td data-label="Подбор">@Html.Raw(match.Status.Pill())</td>
+                            <td data-label="Соответствие">
+                                <span class="score" aria-label="Соответствие @(match.MatchScore ?? 0) из 100">@(match.MatchScore ?? 0)%</span>
+                            </td>
+                            <td data-label="Действия" class="text-end text-nowrap">
+                                <form asp-action="RemoveMatch" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <input type="hidden" name="vacancyId" value="@match.VacancyId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Убрать</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
+
+<div class="form-actions form-actions-between">
     <a asp-action="Index" class="btn btn-outline-secondary">Вернуться к кандидатам</a>
+    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Удалить кандидата</a>
 </div>

@@ -11,8 +11,8 @@ public class ReportService(
     IHrmsRepository<Candidate> candidates) : IReportService
 {
     /// <summary>
-    /// Запрос 1 (нетривиальный): открытые вакансии, у которых срок приёма резюме истекает
-    /// в ближайшие N дней, с подсчётом поданных резюме и числом дней до дедлайна.
+    /// Открытые вакансии с дедлайном в ближайшие N дней: считаем отклики и подборы,
+    /// чтобы HR видел, где заканчивается поток кандидатов.
     /// </summary>
     public async Task<List<ExpiringVacancyDto>> GetVacanciesWithExpiringDeadlineAsync(int days, CancellationToken ct = default)
     {
@@ -30,86 +30,126 @@ public class ReportService(
                 v.Department,
                 v.AcceptingResumesUntil!.Value,
                 v.AcceptingResumesUntil.Value.DayNumber - today.DayNumber,
-                v.Interviews.Select(i => i.ResumeId).Distinct().Count()))
+                v.Applications.Count,
+                v.ResumeMatches.Count))
             .ToListAsync(ct))
             .OrderBy(dto => dto.AcceptingResumesUntil)
             .ToList();
     }
 
     /// <summary>
-    /// Запрос 2 (нетривиальный): агрегированный профиль кандидата — все его резюме
-    /// с вакансиями и все собеседования с участниками (N:N), в одном проходе.
+    /// Карточка кандидата: одно резюме, все отклики с собеседованиями и сохранённые подборы.
     /// </summary>
     public async Task<CandidateProfileDto?> GetCandidateProfileAsync(int candidateId, CancellationToken ct = default)
     {
         var candidate = await candidates.Query()
-            .Where(c => c.Id == candidateId)
-            .Select(c => new
-            {
-                c.Id,
-                c.LastName,
-                c.FirstName,
-                c.Email,
-                c.Phone,
-                Resumes = c.Resumes
-                    .OrderByDescending(r => r.SubmittedAt)
-                    .Select(r => new CandidateResumeDto(
-                        r.Id,
-                        r.Vacancy != null ? r.Vacancy.Title : null,
-                        r.Status,
-                        r.ExperienceYears,
-                        DateOnly.FromDateTime(r.SubmittedAt),
-                        r.Interviews
-                            .OrderBy(i => i.ScheduledAt)
-                            .Select(i => new InterviewInfoDto(
-                                i.ScheduledAt,
-                                i.Mode,
-                                i.Result,
-                                i.Vacancy.Title,
-                                i.Participants.Select(p => p.Interviewer.FullName + " (" + p.Role + ")").ToList()))
-                            .ToList()))
-                    .ToList(),
-            })
-            .FirstOrDefaultAsync(ct);
+            .Include(c => c.Resume).ThenInclude(r => r!.Details)
+            .Include(c => c.Applications).ThenInclude(a => a.Vacancy)
+            .Include(c => c.Applications).ThenInclude(a => a.Interviews)
+            .Include(c => c.Resume!).ThenInclude(r => r!.VacancyMatches).ThenInclude(m => m.Vacancy)
+            .FirstOrDefaultAsync(c => c.Id == candidateId, ct);
 
         if (candidate is null) return null;
+
+        var applications = candidate.Applications
+            .OrderByDescending(a => a.AppliedAt)
+            .Select(a => new CandidateApplicationDto(
+                a.Id,
+                a.VacancyId,
+                a.Vacancy.Title,
+                a.Vacancy.Department,
+                a.Stage,
+                a.AppliedAt,
+                a.Interviews.Count))
+            .ToList();
+
+        var matches = candidate.Resume?.VacancyMatches
+            .OrderByDescending(m => m.MatchScore)
+            .Select(m => new CandidateVacancyMatchDto(
+                m.VacancyId,
+                m.Vacancy.Title,
+                m.Vacancy.Department,
+                m.Vacancy.Status,
+                m.Status,
+                m.MatchScore))
+            .ToList() ?? [];
 
         return new CandidateProfileDto(
             candidate.Id,
             $"{candidate.LastName} {candidate.FirstName}",
             candidate.Email,
             candidate.Phone,
-            candidate.Resumes.Count,
-            candidate.Resumes.Sum(r => r.Interviews.Count),
-            candidate.Resumes);
+            candidate.Resume?.Headline,
+            candidate.Resume?.ExperienceYears ?? 0,
+            candidate.Resume?.DesiredSalary,
+            candidate.Resume?.Details?.Skills,
+            candidate.Resume?.Details?.Education,
+            candidate.Resume?.Summary,
+            applications.Count,
+            applications.Sum(a => a.InterviewCount),
+            applications,
+            matches);
     }
 
     /// <summary>
-    /// Запрос 3 (нетривиальный): количество собеседований по каждой вакансии за период
-    /// с разбиением по результатам — условная агрегация внутри группировки.
+    /// Собеседования по вакансиям за период с разбиением по результатам.
     /// </summary>
     public async Task<List<VacancyInterviewSummaryDto>> GetInterviewSummaryByVacancyAsync(DateTime from, DateTime to, CancellationToken ct = default)
     {
-        return (await vacancies.Query()
-            .Select(v => new
+        var list = await vacancies.Query()
+            .Include(v => v.Applications).ThenInclude(a => a.Interviews)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        return list
+            .Select(v =>
             {
+                var interviews = v.Applications
+                    .SelectMany(a => a.Interviews)
+                    .Where(i => i.ScheduledAt >= from && i.ScheduledAt < to)
+                    .ToList();
+
+                return new VacancyInterviewSummaryDto(
+                    v.Id,
+                    v.Title,
+                    v.Department,
+                    interviews.Count,
+                    interviews.Count(i => i.Result == InterviewResult.Passed),
+                    interviews.Count(i => i.Result == InterviewResult.Failed),
+                    interviews.Count(i => i.Result == InterviewResult.Scheduled),
+                    interviews.Count(i => i.Result == InterviewResult.Cancelled));
+            })
+            .Where(x => x.TotalInterviews > 0)
+            .OrderByDescending(x => x.TotalInterviews)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Воронка по вакансиям: условная агрегация откликов по этапам и конверсия в найм.
+    /// </summary>
+    public async Task<List<VacancyPipelineDto>> GetPipelineByVacancyAsync(CancellationToken ct = default)
+    {
+        var list = await vacancies.Query()
+            .Include(v => v.Applications)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        return list
+            .Select(v => new VacancyPipelineDto(
                 v.Id,
                 v.Title,
                 v.Department,
-                Interviews = v.Interviews.Where(i => i.ScheduledAt >= from && i.ScheduledAt < to),
-            })
-            .Where(x => x.Interviews.Any())
-            .Select(x => new VacancyInterviewSummaryDto(
-                x.Id,
-                x.Title,
-                x.Department,
-                x.Interviews.Count(),
-                x.Interviews.Count(i => i.Result == InterviewResult.Passed),
-                x.Interviews.Count(i => i.Result == InterviewResult.Failed),
-                x.Interviews.Count(i => i.Result == InterviewResult.Scheduled),
-                x.Interviews.Count(i => i.Result == InterviewResult.Cancelled)))
-            .ToListAsync(ct))
-            .OrderByDescending(x => x.TotalInterviews)
+                v.Status,
+                v.Applications.Count,
+                v.Applications.Count(a => a.Stage == ApplicationStage.Applied),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Screening),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Interview),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Offer),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Hired),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Rejected),
+                v.Applications.Count(a => a.Stage == ApplicationStage.Withdrawn)))
+            .OrderByDescending(x => x.TotalApplications)
+            .ThenBy(x => x.Title)
             .ToList();
     }
 }

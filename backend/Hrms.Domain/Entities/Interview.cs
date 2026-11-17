@@ -6,13 +6,9 @@ public class Interview
 {
     public int Id { get; set; }
 
-    public int ResumeId { get; set; }
+    public int ApplicationId { get; set; }
 
-    public Resume Resume { get; set; } = null!;
-
-    public int VacancyId { get; set; }
-
-    public Vacancy Vacancy { get; set; } = null!;
+    public JobApplication Application { get; set; } = null!;
 
     public DateTime ScheduledAt { get; set; }
 

@@ -23,3 +23,4 @@ An Architecture Decision Record (ADR) captures an important architecture decisio
 - [Implement reports and authentication per assignment](2026-11-15-implement-reports-and-authentication.md) (2026-11-15)
 - [Organize repository into backend and frontend folders](2026-11-16-organize-repository-into-backend-and-frontend.md) (2026-11-16)
 - [Switch development database from SQLite to MySQL](2026-11-16-switch-database-from-sqlite-to-mysql.md) (2026-11-16)
+- [Model hiring with applications and resume-vacancy matches](2026-11-17-model-hiring-pipeline-with-applications-and-matches.md) (2026-11-17)

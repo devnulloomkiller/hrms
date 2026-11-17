@@ -1,13 +1,17 @@
 @model Hrms.Domain.Entities.Candidate
 @{ ViewData["Title"] = $"Удалить: {Model.LastName} {Model.FirstName}"; }
 <header class="page-header">
-    <div class="page-header-copy"><h1 class="page-title">Удалить кандидата</h1></div>
+    <div class="page-header-copy">
+        <h1 class="page-title">Удалить кандидата</h1>
+        <p class="page-description">Действие нельзя отменить.</p>
+    </div>
 </header>
 <div class="card delete-card">
-    <h2>Удалить @Model.LastName @Model.FirstName (@Model.Email)? Вместе с кандидатом будут удалены его резюме: @Model.Resumes.Count.</h2>
+    <h2>Удалить @Model.LastName @Model.FirstName?</h2>
+    <p>Вместе с кандидатом удалятся его резюме, @Model.Applications.Count отклик(ов) и все связанные собеседования.</p>
     <form asp-action="Delete" method="post" class="form-actions">
         <input type="hidden" asp-for="Id" />
         <button type="submit" class="btn btn-danger">Удалить кандидата</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Отмена</a>
     </form>
 </div>

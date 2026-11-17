@@ -12,5 +12,7 @@ public class Candidate
 
     public string? Phone { get; set; }
 
-    public List<Resume> Resumes { get; set; } = [];
+    public Resume? Resume { get; set; }
+
+    public List<JobApplication> Applications { get; set; } = [];
 }

@@ -1,0 +1,129 @@
+@model List<Hrms.Application.DTOs.ResumeMatchDto>
+@using Hrms.Domain.Enums
+@{
+    var vacancy = (Hrms.Domain.Entities.Vacancy)ViewBag.Vacancy;
+    ViewData["Title"] = $"Подбор резюме: {vacancy.Title}";
+    var minExperience = ViewBag.MinExperience as int?;
+    var skill = ViewBag.Skill as string;
+    var maxDesiredSalary = ViewBag.MaxDesiredSalary as decimal?;
+    var onlyNotLinked = ViewBag.OnlyNotLinked == true;
+    var onlyOpenVacancy = ViewBag.OnlyOpenVacancy == true;
+    var hasFilters = minExperience is not null || !string.IsNullOrWhiteSpace(skill) || maxDesiredSalary is not null || !onlyNotLinked || !onlyOpenVacancy;
+}
+<header class="page-header">
+    <div class="page-header-copy">
+        <p class="section-label">Подбор</p>
+        <h1 class="page-title">Резюме для «@vacancy.Title»</h1>
+        <p class="page-description">@vacancy.Department · от @vacancy.MinExperience лет опыта · @(string.IsNullOrWhiteSpace(vacancy.RequiredSkills) ? "навыки не заданы" : vacancy.RequiredSkills)</p>
+    </div>
+    <a asp-action="Details" asp-route-id="@vacancy.Id" class="btn btn-outline-secondary">К вакансии</a>
+</header>
+
+<form method="get" class="filter-bar" role="search" aria-label="Фильтр резюме для подбора">
+    <div class="filter-field">
+        <label class="form-label" for="min-experience">Опыт от, лет</label>
+        <input id="min-experience" name="minExperience" value="@minExperience" class="form-control" type="number" min="0" max="60" inputmode="numeric" />
+    </div>
+    <div class="filter-field">
+        <label class="form-label" for="skill">Навык</label>
+        <input id="skill" name="skill" value="@skill" class="form-control" placeholder="Например, EF Core" />
+    </div>
+    <div class="filter-field">
+        <label class="form-label" for="max-salary">Зарплата до, ₽</label>
+        <input id="max-salary" name="maxDesiredSalary" value="@maxDesiredSalary" class="form-control" type="number" min="0" step="0.01" inputmode="numeric" />
+    </div>
+    <label class="filter-check">
+        <input type="checkbox" name="onlyNotLinked" value="true" checked="@onlyNotLinked" />
+        Скрыть уже связанные
+    </label>
+    <label class="filter-check">
+        <input type="checkbox" name="onlyOpenVacancy" value="true" checked="@onlyOpenVacancy" />
+        Только активные вакансии
+    </label>
+    <div class="filter-actions">
+        <button type="submit" class="btn btn-outline-primary">Показать</button>
+        <a asp-action="Match" asp-route-id="@vacancy.Id" class="btn btn-link">Сбросить</a>
+    </div>
+</form>
+
+<p class="form-hint">Оценка считается по трём критериям: опыт (40), совпадение обязательных навыков (40) и попадание желаемой зарплаты в вилку вакансии (20).</p>
+
+@if (Model.Count == 0) {
+    <section class="empty-state">
+        @if (hasFilters) {
+            <h2>Подходящих резюме не нашлось</h2>
+            <p>Попробуйте снизить требования или показать резюме, которые уже связаны с вакансией.</p>
+            <a asp-action="Match" asp-route-id="@vacancy.Id" class="btn btn-outline-secondary">Сбросить фильтры</a>
+        } else {
+            <h2>Резюме пока нет</h2>
+            <p>Добавьте кандидатов с резюме — после этого подбор заработает.</p>
+            <a asp-controller="Candidates" asp-action="Create" class="btn btn-primary">Добавить кандидата</a>
+        }
+    </section>
+} else {
+    <form asp-action="Match" method="post">
+        <input type="hidden" name="id" value="@vacancy.Id" />
+        <div class="card table-card responsive-table-card">
+            <div class="table-wrap">
+                <table class="table table-hover align-middle responsive-table">
+                    <caption class="visually-hidden">Резюме, подходящие вакансии @vacancy.Title</caption>
+                    <thead>
+                        <tr><th class="check-column"><span class="visually-hidden">Выбрать</span></th><th>Кандидат</th><th>Опыт</th><th>Зарплата</th><th>Навыки</th><th>Соответствие</th><th>Связь</th></tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var resume in Model) {
+                        <tr>
+                            <td class="check-column" data-label="Выбрать">
+                                @if (!resume.IsLinked) {
+                                    <input type="checkbox" name="resumeIds" value="@resume.ResumeId" aria-label="Выбрать резюме @resume.CandidateName" />
+                                } else {
+                                    <span class="text-muted" aria-label="Уже связано">—</span>
+                                }
+                            </td>
+                            <td data-label="Кандидат">
+                                <a asp-controller="Candidates" asp-action="Details" asp-route-id="@resume.CandidateId" class="text-decoration-none fw-semibold">@resume.CandidateName</a>
+                                <span class="table-subtext">@resume.Headline</span>
+                            </td>
+                            <td data-label="Опыт">@resume.ExperienceYears л.</td>
+                            <td data-label="Зарплата" class="font-mono text-nowrap">@(resume.DesiredSalary?.ToString("N0") ?? "—") ₽</td>
+                            <td data-label="Навыки">
+                                @if (!string.IsNullOrWhiteSpace(resume.Skills)) {
+                                    <span class="skill-text" title="@resume.Skills">@resume.Skills</span>
+                                } else {
+                                    <span class="text-muted">Не указаны</span>
+                                }
+                            </td>
+                            <td data-label="Соответствие">
+                                <div class="score-cell">
+                                    <span class="score">@resume.MatchScore%</span>
+                                    <span class="score-meter" aria-hidden="true"><span style="width:@resume.MatchScore%"></span></span>
+                                </div>
+                            </td>
+                            <td data-label="Связь">
+                                @if (resume.ApplicationStage is { } stage) {
+                                    @Html.Raw(stage.Pill())
+                                } else if (resume.LinkStatus is { } linkStatus) {
+                                    @Html.Raw(linkStatus.Pill())
+                                } else {
+                                    <span class="text-muted">Не связана</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-actions">
+            <div class="filter-field">
+                <label class="form-label" for="match-status">Статус подбора</label>
+                <select id="match-status" name="status" class="form-select">
+                    <option value="@MatchStatus.Suggested">Предложен</option>
+                    <option value="@MatchStatus.Shortlisted">Шортлист</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить выбранные в подборку</button>
+            <a asp-action="Details" asp-route-id="@vacancy.Id" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+}

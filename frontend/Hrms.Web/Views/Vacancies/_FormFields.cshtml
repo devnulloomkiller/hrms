@@ -1,0 +1,70 @@
+@model Hrms.Domain.Entities.Vacancy
+@using Hrms.Domain.Enums
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+<fieldset class="form-section">
+    <legend class="form-section-title">Основное</legend>
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Название</label>
+        <input asp-for="Title" class="form-control" placeholder="Например, Senior .NET Developer" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Department" class="form-label">Отдел</label>
+        <input asp-for="Department" class="form-control" placeholder="Разработка, HR, Продукт…" />
+        <span asp-validation-for="Department" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Описание</label>
+        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Задачи, команда, условия"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</fieldset>
+
+<fieldset class="form-section">
+    <legend class="form-section-title">Условия и подбор</legend>
+    <p class="form-hint">Минимальный опыт и обязательные навыки используются при подборе резюме и расчёте соответствия.</p>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="SalaryMin" class="form-label">Зарплата от, ₽</label>
+            <input asp-for="SalaryMin" class="form-control" type="number" min="0" step="0.01" inputmode="numeric" />
+            <span asp-validation-for="SalaryMin" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="SalaryMax" class="form-label">Зарплата до, ₽</label>
+            <input asp-for="SalaryMax" class="form-control" type="number" min="0" step="0.01" inputmode="numeric" />
+            <span asp-validation-for="SalaryMax" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="MinExperience" class="form-label">Опыт от, лет</label>
+            <input asp-for="MinExperience" class="form-control" type="number" min="0" max="60" inputmode="numeric" />
+            <span asp-validation-for="MinExperience" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="RequiredSkills" class="form-label">Обязательные навыки</label>
+        <input asp-for="RequiredSkills" class="form-control" placeholder="C#, ASP.NET Core, EF Core, SQL" />
+        <span class="form-hint">Через запятую. Чем больше навыков совпало с резюме, тем выше оценка.</span>
+        <span asp-validation-for="RequiredSkills" class="text-danger"></span>
+    </div>
+</fieldset>
+
+<fieldset class="form-section">
+    <legend class="form-section-title">Публикация</legend>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="Status" class="form-label">Статус</label>
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<VacancyStatus>()" class="form-select"></select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="PublishedAt" class="form-label">Дата публикации</label>
+            <input asp-for="PublishedAt" class="form-control" type="date" />
+            <span asp-validation-for="PublishedAt" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="AcceptingResumesUntil" class="form-label">Приём резюме до</label>
+            <input asp-for="AcceptingResumesUntil" class="form-control" type="date" />
+            <span class="form-hint">Можно оставить пустым — тогда срок не ограничен.</span>
+        </div>
+    </div>
+</fieldset>

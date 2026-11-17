@@ -1,214 +1,115 @@
-# Design System Master File
+# Design System Master File — HRMS
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> Источник правды по UI. Реализация токенов — `frontend/Hrms.Web/wwwroot/css/site.css`.
+> Для страницы сначала проверьте `design-system/hrms/pages/[page-name].md`; если файла нет, действуют правила ниже.
 
----
-
-**Project:** HRMS
-**Generated:** 2026-11-15 15:27:32
-**Category:** Smart Home/IoT Dashboard
-
----
+**Project:** HRMS — кадровый учёт и найм
+**Direction:** монохромный рабочий стол HR; светлая тема по умолчанию, тёмная — переключателем
+**Updated:** 2026-11-17
 
 ## Global Rules
 
 ### Color Palette
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#1E293B` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| On Secondary | `#FFFFFF` | `--color-on-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
-| On Accent/CTA | `#0F172A` | `--color-on-accent` |
-| Background | `#0F172A` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Card | `#1B2336` | `--color-card` |
-| Card Foreground | `#F8FAFC` | `--color-card-foreground` |
-| Muted | `#272F42` | `--color-muted` |
-| Muted Foreground | `#94A3B8` | `--color-muted-foreground` |
-| Border | `#475569` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| On Destructive | `#000000` | `--color-on-destructive` |
-| Ring | `#FFFFFF` | `--color-ring` |
+Палитра намеренно нейтральная: цвет не конкурирует с данными, а статусы всегда дублируются текстом.
 
-**Color Notes:** Dark tech + status green
+| Role | Light | Dark | CSS Variable |
+|------|-------|------|--------------|
+| Primary / ink | `#111111` | `#FFFFFF` | `--color-primary` |
+| On primary | `#FFFFFF` | `#000000` | `--color-on-primary` |
+| Background | `#F7F7F7` | `#000000` | `--color-background` |
+| Card | `#FFFFFF` | `#111111` | `--color-card` |
+| Foreground | `#111111` | `#F5F5F5` | `--color-foreground` |
+| Muted | `#EFEFEF` | `#1F1F1F` | `--color-muted` |
+| Muted foreground | `#595959` | `#B0B0B0` | `--color-muted-foreground` |
+| Border | `#DDDDDD` | `#333333` | `--color-border` |
+| Border strong | `#A3A3A3` | `#666666` | `--color-border-strong` |
+| Soft accent | `#E8E8E8` | `#262626` | `--color-soft-accent` |
+| Soft danger | `#EFEFEF` | `#1F1F1F` | `--color-soft-danger` |
+| Soft warning | `#DFDFDF` | `#303030` | `--color-soft-warning` |
+
+No brand gradient, no colored glow, no purple/blue default. Status pills use neutral tints plus a text label; `pill-hired` may invert to primary ink.
 
 ### Typography
 
-- **Heading Font:** Fira Code
-- **Body Font:** Fira Sans
-- **Mood:** dashboard, data, analytics, code, technical, precise
-- **Google Fonts:** [Fira Code + Fira Sans](https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap)
+- **UI / body:** Plus Jakarta Sans, weights 400–800.
+- **Dates, sums, scores:** Fira Code, tabular numbers.
+- **Headings:** Plus Jakarta Sans 600–700, balanced wrapping; page title `clamp(1.75rem, 3vw, 2.4rem)`.
+- Body 15px, line-height 1.55; helper text 12–13px and never below AA contrast.
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
-```
-
-### Spacing Variables
+### Layout & Spacing
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| `--radius-sm` | 6px | pills, small controls |
+| `--radius-md` | 10px | cards, inputs |
+| `--radius-lg` | 16px | large surfaces |
+| sidebar | 232px desktop | fixed left navigation |
+| app container | `min(100% - 3rem, 1320px)` | workspace width |
 
-### Shadow Depths
+Use a 4/8px rhythm. Tables and forms live in cards with 1px borders and no elevation; shadow is reserved for dropdowns.
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+## Components
 
----
+### Buttons and links
 
-## Component Specs
+- Minimum 44px height; focus ring `3px` with offset, visible in both themes.
+- Primary action: ink background + white text. Secondary: outline. Danger: outline text button; destructive confirmation is a separate page.
+- Every clickable element gets `cursor: pointer`; disabled gets `not-allowed` and reduced emphasis.
 
-### Buttons
+### Forms
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+- Label above input; helper text below; inline validation next to the field and an error summary at the top with `role="alert"`.
+- Keep server-side validation; client validation is progressive enhancement.
+- Date inputs use `date` / `datetime-local`; decimal money inputs use `step="0.01"` (jQuery step validator rejects `.00` with `step="1000"`).
+- Combined candidate form edits contacts and the single resume together; do not offer a second resume CRUD.
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+### Tables
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #1E293B;
-  border: 2px solid #1E293B;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
+- Wrap every table in `.table-wrap`; on mobile use `.responsive-table` + `data-label` to turn rows into cards.
+- Header is muted with 12px uppercase-free labels; numeric columns use tabular figures.
+- Empty state explains what to do next and includes the action, not just “0 results”.
 
-### Cards
+### Filters
 
-```css
-.card {
-  background: #0F172A;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+- Filter bar uses a card, visible labels, and URL query parameters so the state is shareable.
+- Checkboxes are real form controls; on mobile they stack full-width and stay tappable.
+- “Nothing found” state offers a reset action; it never dead-ends.
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
+### Pipeline board
 
-### Inputs
+- Stage columns: Новые, Скрининг, Собеседования, Оффер, Наняты; closed applications live in a native `<details>`.
+- Card shows candidate, vacancy, experience, applied date and interview count; “Открыть отклик” is the action.
+- Desktop: five columns; mobile: one column per stage (no hidden horizontal content).
 
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
+### Match score
 
-.input:focus {
-  border-color: #1E293B;
-  outline: none;
-  box-shadow: 0 0 0 3px #1E293B20;
-}
-```
+- Show a number and a small meter, never color alone. Score 0–100: experience 40, required skills 40, salary fit 20.
+- Filtering is a human action: suggestions are not auto-linked.
 
-### Modals
+## UX Rules
 
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
+- Every list has a useful empty state, and every form has a way back.
+- Success and error after a form submit are shown as a flash message (`role="status"` / `role="alert"`).
+- Do not delete data silently: deleting a vacancy with applications is blocked with an explanation; deleting a candidate warns about cascading applications and interviews.
+- Scheduling an interview advances an application from “Новый отклик”/“Скрининг” to “Собеседование”.
+- Keep keyboard focus visible, preserve source order, and respect `prefers-reduced-motion`.
+- Icons are inline SVG, 1.8px stroke, `aria-hidden` when decorative; no emoji as UI icons.
 
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+## Anti-Patterns
 
----
-
-## Style Guidelines
-
-**Style:** Glassmorphism
-
-**Keywords:** Frosted glass, transparent, blurred background, layered, vibrant background, light source, depth, multi-layer
-
-**Best For:** Modern SaaS, financial dashboards, high-end corporate, lifestyle apps, modal overlays, navigation
-
-**Key Effects:** Backdrop blur (10-20px), subtle border (1px solid rgba white 0.2), light reflection, Z-depth
-
-### Page Pattern
-
-**Pattern Name:** Real-Time / Operations Landing
-
-- **Conversion Strategy:** Offer a demo or sandbox and show trust signals. Label telemetry as live only when backed by a current source, with update time and stale state. Provide pause/hide or update-frequency controls for tickers and previews, stop offscreen/hidden work, support keyboard controls, and render a static final snapshot under reduced motion.
-- **CTA Placement:** Primary CTA in nav + After metrics
-- **Section Order:** Hero (product + live preview or status) > Key metrics/indicators > How it works > CTA (Start trial / Contact)
-
----
-
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Slow updates
-- ❌ No automation
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
+- Multi-color status palettes, gradients, glassmorphism on every surface, colored left stripes, decorative dots.
+- Hidden filters, filter bars with labels only as placeholders, tables that overflow the page instead of their wrapper.
+- Toasts as the only error feedback, English validation messages in Russian UI, `outline: none` without replacement.
+- Cards inside cards inside cards; decorative dashboards with metrics that do not link to the data behind them.
 
 ## Pre-Delivery Checklist
 
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- [ ] Light and dark themes checked independently; text contrast ≥ 4.5:1, borders/focus ≥ 3:1.
+- [ ] 375px: no horizontal page overflow; tables are cards or scroll inside `.table-wrap`; pipeline stages stack.
+- [ ] All touch targets ≥ 44px and not crowded.
+- [ ] Labels, hints, error summary and inline errors are present; errors announced.
+- [ ] Empty, loading and error states exist where data loads.
+- [ ] `prefers-reduced-motion` respected.
+- [ ] Icons are SVG, consistent stroke, decorative ones hidden from screen readers.
+- [ ] Filters and current state reflected in the URL.
